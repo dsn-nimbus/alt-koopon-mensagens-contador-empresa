@@ -138,6 +138,100 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
             })
         })
 
+        describe('listarEmpresasAssuntos', function() {
+            it('deve tentar listar as empresas com os asssuntos, mas servidor retorna erro', function() {
+                var _urlAssuntos = URL_BASE;
+
+                _httpBackend.expectGET(_urlAssuntos).respond(400);
+
+                _AltKooponMensagemService
+                  .listarEmpresasAssuntos()
+                  .then(function(){expect(true).toBe(false)})
+                  .catch(function(erro) {
+                    expect(erro).toBeDefined();
+                  });
+
+                _httpBackend.flush();
+            })
+
+            it('deve listar as empresas com os assuntos corretamente', function() {
+                var _urlAssuntos = URL_BASE;
+                var _resposta = {
+                  "1": [
+                    {assunto: "11"},
+                    {assunto: "12"},
+                    {assunto: "13"},
+                  ],
+                  "2": [
+                    {assunto: "21"},
+                    {assunto: "22"},
+                    {assunto: "23"},
+                  ],
+                  "3": [
+                    {assunto: "31"},
+                    {assunto: "32"},
+                    {assunto: "33"},
+                  ]
+                };
+
+                var _respostaParsed = [
+                  {
+                    id: "1",
+                    nome: "a_nome",
+                    assuntos: [
+                      {assunto: "11"},
+                      {assunto: "12"},
+                      {assunto: "13"}]
+                  },
+                  {
+                    id: "2",
+                    nome: "2_nome",
+                    assuntos: [
+                      {assunto: "21"},
+                      {assunto: "22"},
+                      {assunto: "23"}]
+                  },
+                  {
+                    id: "3",
+                    nome: "3_nome",
+                    assuntos: [
+                      {assunto: "31"},
+                      {assunto: "32"},
+                      {assunto: "33"}]
+                  }
+                ];
+
+                spyOn(_AltPassaporteUsuarioLogadoManager, 'retorna').and.returnValue({
+                  assinantesEmpresa: [
+                    {id: 1, nome: '1_nome'},
+                    {id: 2, nome: '2_nome'},
+                    {id: 3, nome: '3_nome'}
+                  ]
+                })
+
+                _httpBackend.expectGET(_urlAssuntos).respond(200, _resposta);
+
+                _AltKooponMensagemService
+                  .listarEmpresasAssuntos()
+                  .then(function(empresas) {
+                    expect(empresas[0].id).toBe('1');
+                    expect(empresas[0].nome).toBe('1_nome');
+                    expect(empresas[0].assuntos).toEqual(_respostaParsed[0].assuntos);
+
+                    expect(empresas[1].id).toBe('2');
+                    expect(empresas[1].nome).toBe('2_nome');
+                    expect(empresas[1].assuntos).toEqual(_respostaParsed[1].assuntos);
+
+                    expect(empresas[2].id).toBe('3');
+                    expect(empresas[2].nome).toBe('3_nome');
+                    expect(empresas[2].assuntos).toEqual(_respostaParsed[2].assuntos);
+                  })
+                  .catch(function(){expect(true).toBe(false)});
+
+                _httpBackend.flush();
+            })
+        })
+
         describe('listarAssuntos', function() {
             it('deve tentar listar assuntos, mas servidor retorna erro', function() {
                 var _urlAssuntos = URL_BASE;

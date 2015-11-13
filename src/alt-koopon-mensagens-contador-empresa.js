@@ -34,6 +34,10 @@
                     method: 'GET',
                     isArray: true
                 },
+                listarEmpresasAssuntos: {
+                    method: 'GET',
+                    isArray: false
+                },
                 listarMensagens: {
                     method: 'GET',
                     isArray: true
@@ -67,17 +71,48 @@
 
             return AltKooponMensagemModel;
         }])
-        .factory('AltKooponMensagemService', ['$q', 'AltKooponMensagemResource', 'AltKooponMensagemModel', function($q, AltKooponMensagemResource, AltKooponMensagemModel) {
-            var AltKooponMensagemService = function(){}
+        .factory('AltKooponMensagemService', ['$q', 'AltPassaporteUsuarioLogadoManager', 'AltKooponMensagemResource', 'AltKooponMensagemModel', function($q, AltPassaporteUsuarioLogadoManager, AltKooponMensagemResource, AltKooponMensagemModel) {
+            var AltKooponMensagemService = function() {
+
+            };
 
             AltKooponMensagemService.prototype.listarAssuntos = function() {
                 return AltKooponMensagemResource
-                    .listarAssuntos()
+                  .listarAssuntos()
+                  .$promise
+                  .then(function(mensagens) {
+                      return mensagens.map(function(msg) {
+                        return new AltKooponMensagemModel(msg);
+                      });
+                  })
+                  .catch(function(erro) {
+                    return $q.reject(erro);
+                  });
+            };
+
+            AltKooponMensagemService.prototype.listarEmpresasAssuntos = function() {
+                return AltKooponMensagemResource
+                    .listarEmpresasAssuntos()
                     .$promise
-                    .then(function(mensagens) {
-                        return mensagens.map(function(msg) {
-                            return new AltKooponMensagemModel(msg);
-                        });
+                    .then(function(empresas) {
+                        var _empresas = [];
+                        var _assinantesStorage = AltPassaporteUsuarioLogadoManager.retorna().assinantesEmpresa;
+
+                        for (var prop in empresas) {
+                          _assinantesStorage.forEach(function(as) {
+                            if (as.id == prop) {
+                                _empresas.push({
+                                  id: prop,
+                                  nome: as.nome,
+                                  assuntos: empresas[prop]
+                                });
+                            }
+                          })
+
+
+                        }
+
+                        return _empresas;
                     })
                     .catch(function(erro) {
                         return $q.reject(erro);
@@ -168,7 +203,7 @@
             ;(function() {
                 AltKooponMensagemService
                     .listarAssuntos()
-                    .then(function(assuntos){
+                    .then(function(assuntos) {
                         self.assuntos = assuntos;
                     })
                     .catch(function(erro) {
@@ -179,6 +214,9 @@
                     self.assuntos.push(novoAssunto);
                 });
             }());
+        }])
+        .controller('AltKooponEmpresasComMensagensController', ['$scope',  'AltKooponMensagemModel', 'AltKooponMensagemService', 'EVENTO_NOVO_ASSUNTO', function($scope, AltKooponMensagemModel, AltKooponMensagemService, EVENTO_NOVO_ASSUNTO) {
+            var self = this;
         }])
         .controller('AltKooponNovaMensagemController', ['$scope', 'AltKooponMensagemModel', 'AltKooponMensagemService',
                                                         'AltModalService', 'AltPassaporteUsuarioLogadoManager', 'ID_MODAL_MENSAGEM',
