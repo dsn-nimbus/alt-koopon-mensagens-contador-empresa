@@ -17,7 +17,7 @@
         .constant('ID_MODAL_MENSAGEM', '#modal-nova-mensagem')
         .constant('EVENTO_NOVO_ASSUNTO', 'mensagem:novo-assunto')
         .factory('AltKooponMensagemResource', ['$resource', 'ALT_KOOPON_URL_BASE_API_MENSAGEM', function($resource, ALT_KOOPON_URL_BASE_API_MENSAGEM) {
-            var _url = ALT_KOOPON_URL_BASE_API_MENSAGEM + 'mensagens/:id';
+            var _url = ALT_KOOPON_URL_BASE_API_MENSAGEM + 'mensagens/:id/:clientes/:idEmpresa';
             var _params = {
                 id: '@id'
             };
@@ -30,6 +30,13 @@
                     method: 'POST',
                     isArray: false
                 },
+                enviarParaEmpresa: {
+                    method: 'POST',
+                    isArray: false,
+                    params: {
+                      clientes: 'clientes'
+                    }
+                },
                 listarAssuntos: {
                     method: 'GET',
                     isArray: true
@@ -41,6 +48,13 @@
                 listarMensagens: {
                     method: 'GET',
                     isArray: true
+                },
+                listarMensagensParaEmpresa: {
+                    method: 'GET',
+                    isArray: true,
+                    params: {
+                      clientes: 'clientes'
+                    }
                 }
             };
 
@@ -117,9 +131,17 @@
                     });
             };
 
-            AltKooponMensagemService.prototype.listarMensagens = function(id) {
+            AltKooponMensagemService.prototype.listarMensagens = function(idAssunto, idEmpresa) {
+                var _verbo = 'listarMensagens';
+                var _params = {id: idAssunto};
+
+                if (angular.isDefined(idEmpresa)) {
+                  _verbo = 'listarMensagensParaEmpresa';
+                  _params = {id: idAssunto, idEmpresa: idEmpresa};
+                }
+
                 return AltKooponMensagemResource
-                    .listarMensagens({id: id})
+                    [_verbo](_params)
                     .$promise
                     .then(function(mensagens) {
                         return mensagens.map(function(msg) {
@@ -131,9 +153,17 @@
                     });
             };
 
-            AltKooponMensagemService.prototype.enviar = function(msg, idAssunto) {
+            AltKooponMensagemService.prototype.enviar = function(msg, idAssunto, idEmpresa) {
+                var _verbo = 'enviar';
+                var _params = {id: idAssunto};
+
+                if (angular.isDefined(idEmpresa)) {
+                  _verbo = 'enviarParaEmpresa';
+                  _params = {id: idAssunto, idEmpresa: idEmpresa};
+                }
+                
                 return AltKooponMensagemResource
-                    .enviar({id: idAssunto}, msg)
+                    [_verbo](_params, msg)
                     .$promise
                     .then(function(mensagemEnviada) {
                         return new AltKooponMensagemModel(mensagemEnviada);
@@ -171,7 +201,7 @@
                         self.assuntos
                             .forEach(function(assunto) {
                                 if (assunto.idMensagem === idAssunto) {
-                                    assunto.mensagens.push(msgResposta);
+                                    return assunto.mensagens.push(msgResposta);
                                 }
                             });
                     })
@@ -215,6 +245,65 @@
         }])
         .controller('AltKooponEmpresasComMensagensController', ['$scope',  'AltKooponMensagemModel', 'AltKooponMensagemService', 'EVENTO_NOVO_ASSUNTO', function($scope, AltKooponMensagemModel, AltKooponMensagemService, EVENTO_NOVO_ASSUNTO) {
             var self = this;
+
+            self.empresas = [];
+
+            self.listarMensagens = function(idEmpresa, idAssunto) {
+                AltKooponMensagemService
+                  .listarMensagens(idAssunto, idEmpresa)
+                  .then(function(msgs) {
+                    self.empresas.forEach(function(emp) {
+                      if (emp.id === idEmpresa) {
+                          emp.assuntos.forEach(function(assunto) {
+                              if (assunto.idMensagem === idAssunto) {
+                                return assunto.mensagens = msgs;
+                              }
+                          })
+                      }
+                    });
+                  })
+                  .catch(function() {
+
+                  });
+            };
+
+            self.responder = function(msg, idEmpresa, idAssunto) {
+                AltKooponMensagemService
+                  .enviar(msg, idAssunto, idEmpresa)
+                  .then(function(msgEnviada) {
+                    self.empresas.forEach(function(emp) {
+                      if (emp.id === idEmpresa) {
+                        emp.assuntos.forEach(function(assunto) {
+                          if (assunto.idMensagem === idAssunto) {
+                            return assunto.mensagens.push(msgEnviada);
+                          }
+                        })
+                      }
+                    })
+                  })
+                  .catch(function() {
+
+                  });
+            };
+
+            ;(function() {
+              AltKooponMensagemService
+                .listarEmpresasAssuntos()
+                .then(function(empresasComAssuntos) {
+                  self.empresas = empresasComAssuntos;
+                })
+                .catch(function(erro) {
+
+                });
+
+              $scope.$on(EVENTO_NOVO_ASSUNTO, function(ev, novoAssunto) {
+                self.empresas.forEach(function(emp) {
+                  if (emp.id === novoAssunto.empresaEscolhida) {
+                      return emp.assuntos.push(novoAssunto);
+                  }
+                });
+              });
+            }());
         }])
         .controller('AltKooponNovaMensagemController', ['$scope', 'AltKooponMensagemModel', 'AltKooponMensagemService',
                                                         'AltModalService', 'AltPassaporteUsuarioLogadoManager', 'ID_MODAL_MENSAGEM',
@@ -225,11 +314,14 @@
             var self = this;
 
             self.mensagem = new AltKooponMensagemModel();
+            self.clientes = AltPassaporteUsuarioLogadoManager.retorna().assinantesEmpresa;
 
-            self.enviar = function(msg) {
+            self.enviar = function(msg, idEmpresa) {
                 AltKooponMensagemService
-                    .enviar(msg)
+                    .enviar(msg, undefined, idEmpresa)
                     .then(function(msgEnviada) {
+                        angular.extend(msgEnviada, msg);
+
                         self.mensagem = new AltKooponMensagemModel();
 
                         $scope.$emit(EVENTO_NOVO_ASSUNTO, msgEnviada);
