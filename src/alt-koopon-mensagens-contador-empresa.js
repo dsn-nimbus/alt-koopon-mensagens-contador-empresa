@@ -213,8 +213,6 @@
             };
 
             self.listarMensagens = function(idAssunto) {
-                AltCarregandoInfoService.exibe();
-
                 AltKooponMensagemService
                     .listarMensagens(idAssunto)
                     .then(function(msgs) {
@@ -229,13 +227,12 @@
                     })
                     .catch(function(erro) {
 
-                    })
-                    .finally(function() {
-                      AltCarregandoInfoService.esconde();
                     });
             };
 
             ;(function() {
+                AltCarregandoInfoService.exibe();
+
                 AltKooponMensagemService
                     .listarAssuntos()
                     .then(function(assuntos) {
@@ -243,6 +240,9 @@
                     })
                     .catch(function(erro) {
 
+                    })
+                    .finally(function() {
+                      AltCarregandoInfoService.esconde();
                     });
 
                 $scope.$on(EVENTO_NOVO_ASSUNTO, function(ev, novoAssunto) {
@@ -307,7 +307,7 @@
                 })
                 .finally(function() {
                     AltCarregandoInfoService.esconde();
-                })
+                });
 
               $scope.$on(EVENTO_NOVO_ASSUNTO, function(ev, novoAssunto) {
                 self.empresas.forEach(function(emp) {
