@@ -1,7 +1,7 @@
 {
   "name": "alt-koopon-mensagens-contador-empresa",
   "main": "dist/alt-koopon-mensagens-contador-empresa.min.js",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "homepage": "https://github.com/dsn-nimbus/alt-koopon-mensagens-contador-empresa.git",
   "authors": [
     "dsn-nimbus <ericdantas0@gmail.com>"
