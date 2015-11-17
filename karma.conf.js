@@ -20,6 +20,7 @@ module.exports = function(config) {
       'bower_components/angular-resource/angular-resource.js',
       'bower_components/alt-passaporte-usuario-logado/dist/alt-passaporte-usuario-logado.min.js',
       'bower_components/alt-modal-service/dist/alt-modal-service.min.js',
+      'bower_components/alt-carregando-info/dist/alt-carregando-info.min.js',
       'bower_components/ng-xtorage/ng-xtorage.js',
 
       'bower_components/angular-mocks/angular-mocks.js',

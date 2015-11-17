@@ -5,7 +5,8 @@
         .module('alt.koopon.mensagens-contador-empresa', [
             'ngResource',
             'alt.passaporte-usuario-logado',
-            'alt.modal-service'
+            'alt.modal-service',
+            'alt.carregando-info'
         ])
         .provider('ALT_KOOPON_URL_BASE_API_MENSAGEM', [function() {
             this.urlBase = '/koopon-rest-api/';
@@ -161,7 +162,7 @@
                   _verbo = 'enviarParaEmpresa';
                   _params = {id: idAssunto, idEmpresa: idEmpresa};
                 }
-                
+
                 return AltKooponMensagemResource
                     [_verbo](_params, msg)
                     .$promise
@@ -187,7 +188,8 @@
 
             return new AltKooponMensagemService();
         }])
-        .controller('AltKooponMensagensController', ['$scope', 'AltKooponMensagemModel', 'AltKooponMensagemService', 'EVENTO_NOVO_ASSUNTO', function($scope, AltKooponMensagemModel, AltKooponMensagemService, EVENTO_NOVO_ASSUNTO) {
+        .controller('AltKooponMensagensController', ['$scope', 'AltKooponMensagemModel', 'AltKooponMensagemService', 'AltCarregandoInfoService', 'EVENTO_NOVO_ASSUNTO',
+        function($scope, AltKooponMensagemModel, AltKooponMensagemService, AltCarregandoInfoService, EVENTO_NOVO_ASSUNTO) {
             var self = this;
 
             self.novaMensagem = false;
@@ -211,6 +213,8 @@
             };
 
             self.listarMensagens = function(idAssunto) {
+                AltCarregandoInfoService.exibe();
+
                 AltKooponMensagemService
                     .listarMensagens(idAssunto)
                     .then(function(msgs) {
@@ -225,6 +229,9 @@
                     })
                     .catch(function(erro) {
 
+                    })
+                    .finally(function() {
+                      AltCarregandoInfoService.esconde();
                     });
             };
 
@@ -243,7 +250,8 @@
                 });
             }());
         }])
-        .controller('AltKooponEmpresasComMensagensController', ['$scope',  'AltKooponMensagemModel', 'AltKooponMensagemService', 'EVENTO_NOVO_ASSUNTO', function($scope, AltKooponMensagemModel, AltKooponMensagemService, EVENTO_NOVO_ASSUNTO) {
+        .controller('AltKooponEmpresasComMensagensController', ['$scope',  'AltKooponMensagemModel', 'AltKooponMensagemService', 'AltCarregandoInfoService', 'EVENTO_NOVO_ASSUNTO',
+        function($scope, AltKooponMensagemModel, AltKooponMensagemService, AltCarregandoInfoService, EVENTO_NOVO_ASSUNTO) {
             var self = this;
 
             self.empresas = [];
@@ -287,6 +295,8 @@
             };
 
             ;(function() {
+              AltCarregandoInfoService.exibe();
+
               AltKooponMensagemService
                 .listarEmpresasAssuntos()
                 .then(function(empresasComAssuntos) {
@@ -294,7 +304,10 @@
                 })
                 .catch(function(erro) {
 
-                });
+                })
+                .finally(function() {
+                    AltCarregandoInfoService.esconde();
+                })
 
               $scope.$on(EVENTO_NOVO_ASSUNTO, function(ev, novoAssunto) {
                 self.empresas.forEach(function(emp) {
