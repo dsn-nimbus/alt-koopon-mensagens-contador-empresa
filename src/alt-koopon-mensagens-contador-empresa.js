@@ -311,7 +311,7 @@
 
               $scope.$on(EVENTO_NOVO_ASSUNTO, function(ev, novoAssunto) {
                 self.empresas.forEach(function(emp) {
-                  if (emp.id === novoAssunto.empresaEscolhida) {
+                  if (emp.id == novoAssunto.empresaEscolhida) {
                       return emp.assuntos.push(novoAssunto);
                   }
                 });

@@ -780,7 +780,7 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
                   spyOn(_scope, '$on').and.callThrough();
                   spyOn(_scope, '$broadcast').and.callThrough();
 
-                  var _novoAssunto = {empresaEscolhida: 1, assunto: 'a', texto: 'b'};
+                  var _novoAssunto = {empresaEscolhida: "1", assunto: 'a', texto: 'b'};
 
                   spyOn(_AltKooponMensagemService, 'listarEmpresasAssuntos').and.callFake(function() {
                       return _q.when([
