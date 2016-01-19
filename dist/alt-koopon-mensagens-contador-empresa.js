@@ -348,18 +348,33 @@
         .directive('altKooponMensagemToggle', [function() {
             return function(scope, element, attrs) {
                 var mensagensContainer = undefined;
-
+                var elementMsgContainer = undefined;
+				
                 element.find('.assunto-mensagem').on('click', function() {
+					
                     mensagensContainer = angular.element('.mensagens-container');
+                    elementMsgContainer = element.find('.mensagens-container');
+					
+					if (elementMsgContainer.is(':visible')) {
+						
+                        elementMsgContainer.slideUp('fast');
+                        return;
+                    }
 
                     mensagensContainer.slideUp('fast');
-                    element.find(mensagensContainer).slideDown('fast');
+                    elementMsgContainer.slideDown('fast');
                 });
             };
         }])
         .directive('altKooponMensagemActive', [function() {
             return function(scope, element, attrs) {
                 element.on('click', function() {
+					
+					if (element.hasClass('active')){
+                        element.removeClass('active');
+                        return;
+                    }
+					
                     $('[alt-koopon-mensagem-active]').removeClass('active');
                     element.addClass('active');
                 });

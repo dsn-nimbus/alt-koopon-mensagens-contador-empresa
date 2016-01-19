@@ -1039,7 +1039,7 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
         });
 
         describe('click', function() {
-            it('deve chamar o slideDown e Up', function() {
+            it('deve chamar o slideDown e Up - parametros de velocidade corretos', function() {
                 spyOn($.fn, 'slideDown').and.callFake(angular.noop);
                 spyOn($.fn, 'slideUp').and.callFake(angular.noop);
 
@@ -1060,6 +1060,49 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
                 expect($('a').slideDown).toHaveBeenCalledWith('fast');
                 expect($('a').slideUp).toHaveBeenCalledWith('fast');
             })
+			
+			
+			it ('Deve chamar slideup apenas (click na mensagem aberta)', function(){
+				spyOn($.fn, 'slideDown').and.callFake(angular.noop);
+                spyOn($.fn, 'slideUp').and.callFake(angular.noop);
+				spyOn($.fn, 'is').and.returnValue(true);
+				
+				var _html = '<div alt-koopon-mensagem-toggle>\
+                                <h4 class="assunto-mensagem"></h4>\
+                                <div class="mensagens-container"></div>\
+                             </div>';
+
+                _element = angular.element(_html);
+                _compile(_element)(_scope);
+
+                _scope.$digest();
+				
+				_element.find('.assunto-mensagem').click();				
+				
+				expect($('a').slideDown.calls.count()).toBe(0);
+                expect($('a').slideUp.calls.count()).toBe(1);				
+			})
+			
+			it ('Deve chamar slideup apenas (click na mensagem aberta)', function(){
+				spyOn($.fn, 'slideDown').and.callFake(angular.noop);
+                spyOn($.fn, 'slideUp').and.callFake(angular.noop);
+				spyOn($.fn, 'is').and.returnValue(false);
+				
+				var _html = '<div alt-koopon-mensagem-toggle>\
+                                <h4 class="assunto-mensagem"></h4>\
+                                <div class="mensagens-container"></div>\
+                             </div>';
+
+                _element = angular.element(_html);
+                _compile(_element)(_scope);
+
+                _scope.$digest();
+				
+				_element.find('.assunto-mensagem').click();				
+				
+				expect($('a').slideDown.calls.count()).toBe(1);
+                expect($('a').slideUp.calls.count()).toBe(1);				
+			})
         })
     });
 
@@ -1072,6 +1115,7 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
 
         describe('criação', function() {
             it('deve ter a diretiva criada corretamente', function() {
+
                 var _html = '<div alt-koopon-mensagem-active></div>';
 
                 _element = angular.element(_html);
@@ -1084,21 +1128,42 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
         });
 
         describe('click', function() {
-            it('deve chamar o slideDown e Up', function() {
-                spyOn($.fn, 'addClass').and.callFake(angular.noop);
+            it('deve chamar o removeClass, mas nao o addClass', function() {
                 spyOn($.fn, 'removeClass').and.callFake(angular.noop);
-
-                var _html = '<div alt-koopon-mensagem-active></div>';
+                spyOn($.fn, 'hasClass').and.returnValue(true);
+				
+				var _html = '<div alt-koopon-mensagem-active></div>';
 
                 _element = angular.element(_html);
                 _compile(_element)(_scope);
 
                 _scope.$digest();
+				
+				spyOn($.fn, 'addClass').and.callFake(angular.noop);
+				
+				_element.click();
+				
+				expect($('a').addClass.calls.count()).toBe(0);
+                expect($('a').removeClass.calls.count()).toBe(1);
+            })
+			
+			it('deve chamar o tanto o addClass quanto o removeClass', function() {
+                spyOn($.fn, 'removeClass').and.callFake(angular.noop);
+                spyOn($.fn, 'hasClass').and.returnValue(false);
+				
+				var _html = '<div alt-koopon-mensagem-active></div>';
 
-                _element.click();
+                _element = angular.element(_html);
+                _compile(_element)(_scope);
 
-                expect($('a').addClass).toHaveBeenCalledWith('active');
-                expect($('a').removeClass).toHaveBeenCalledWith('active');
+                _scope.$digest();
+				
+				spyOn($.fn, 'addClass').and.callFake(angular.noop);
+				
+				_element.click();
+				
+				expect($('a').addClass.calls.count()).toBe(1);
+                expect($('a').removeClass.calls.count()).toBe(1);
             })
         })
     });
