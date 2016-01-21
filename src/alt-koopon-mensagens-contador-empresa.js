@@ -84,6 +84,10 @@
                 return (this.nomeUsuarioPassaporte === AltPassaporteUsuarioLogadoManager.retorna().nomeUsuario);
             };
 
+            AltKooponMensagemModel.respostaValida = function(resposta){
+                return (angular.isDefined(resposta) && angular.isDefined(resposta.texto) && !!resposta.texto.length);
+            };
+
             return AltKooponMensagemModel;
         }])
         .factory('AltKooponMensagemService', ['$q', 'AltPassaporteUsuarioLogadoManager', 'AltKooponMensagemResource', 'AltKooponMensagemModel', function($q, AltPassaporteUsuarioLogadoManager, AltKooponMensagemResource, AltKooponMensagemModel) {
@@ -193,6 +197,7 @@
             var self = this;
 
             self.novaMensagem = false;
+			self.AltKooponMensagemModel = AltKooponMensagemModel;
             self.mensagem = new AltKooponMensagemModel();
             self.assuntos = [];
 
@@ -203,6 +208,7 @@
                         self.assuntos
                             .forEach(function(assunto) {
                                 if (assunto.idMensagem === idAssunto) {
+									self.mensagem = "";
                                     return assunto.mensagens.push(msgResposta);
                                 }
                             });
@@ -254,6 +260,7 @@
         function($scope, AltKooponMensagemModel, AltKooponMensagemService, AltCarregandoInfoService, EVENTO_NOVO_ASSUNTO) {
             var self = this;
 
+			self.AltKooponMensagemModel = AltKooponMensagemModel;
             self.empresas = [];
 
             self.listarMensagens = function(idEmpresa, idAssunto) {

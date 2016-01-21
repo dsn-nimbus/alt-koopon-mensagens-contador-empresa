@@ -109,6 +109,40 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
                 expect(_akmm.isValid()).toBeTruthy();
             })
         });
+		
+		describe('respostaValida', function(){
+			it('deve deve retornar false - resposta == undefined', function(){
+				var _akmm = _AltKooponMensagemModel;
+				var model = undefined;
+				
+				expect(_akmm.respostaValida(model)).toBe(false);
+			})
+			
+			it('deve deve retornar false - resposta.texto == undefined', function(){
+				var _akmm = _AltKooponMensagemModel;
+				var model = new _AltKooponMensagemModel(modeloMensagemCompleto);
+				
+				model.texto = undefined;
+				expect(_akmm.respostaValida(model)).toBe(false);
+			})
+			
+			
+			it('deve deve retornar false - resposta.texto.length == undefined || < 1', function(){
+				var _akmm = _AltKooponMensagemModel;
+				var model = new _AltKooponMensagemModel(modeloMensagemCompleto);
+				
+				model.texto = "";
+				expect(_akmm.respostaValida(model)).toBe(false);
+			})
+			
+			it('deve deve retornar true - resposta.texto.length != undefined && > 0', function(){
+				var _akmm = _AltKooponMensagemModel;
+				var model = new _AltKooponMensagemModel(modeloMensagemCompleto);
+				
+				model.texto = "Mensagem deve ser enviada.";
+				expect(_akmm.respostaValida(model)).toBe(true);
+			})
+		});
 
         describe('msgDoUsuarioLogado', function() {
             it('deve retornar false, mensagem não é do usuário logado', function() {
@@ -512,8 +546,14 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
             describe('criação', function() {
                 it('deve ter o valor correto para a a propriedade mensagem', inject(function($controller) {
                     $controller(NOME_CONTROLLER_MENSAGENS, {$scope: _scope});
-
+					
                     expect(_scope.akmCtrl.mensagem instanceof _AltKooponMensagemModel).toBe(true);
+                }))
+				
+                it('deve ter o valor correto para a a propriedade AltKooponMensagemModel', inject(function($controller) {
+                    $controller(NOME_CONTROLLER_MENSAGENS, {$scope: _scope});
+					
+					expect(_scope.akmCtrl.AltKooponMensagemModel).toEqual(_AltKooponMensagemModel);
                 }))
 
                 it('deve ter mensagens como um array vazio', inject(function($controller) {
@@ -742,6 +782,12 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
                   $controller(NOME_CONTROLLER_EMPRESAS_MENSAGENS, {$scope: _scope});
 
                   expect(_scope.empMCtrl.empresas).toEqual([]);
+                }))
+
+                it('deve carregar o AltKooponMensagemModel', inject(function($controller) {
+                  $controller(NOME_CONTROLLER_EMPRESAS_MENSAGENS, {$scope: _scope});
+
+                  expect(_scope.empMCtrl.AltKooponMensagemModel).toEqual(_AltKooponMensagemModel);
                 }))
               })
 
