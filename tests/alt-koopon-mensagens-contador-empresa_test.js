@@ -109,36 +109,36 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
                 expect(_akmm.isValid()).toBeTruthy();
             })
         });
-		
+
 		describe('respostaValida', function(){
 			it('deve deve retornar false - resposta == undefined', function(){
 				var _akmm = _AltKooponMensagemModel;
 				var model = undefined;
-				
+
 				expect(_akmm.respostaValida(model)).toBe(false);
 			})
-			
+
 			it('deve deve retornar false - resposta.texto == undefined', function(){
 				var _akmm = _AltKooponMensagemModel;
 				var model = new _AltKooponMensagemModel(modeloMensagemCompleto);
-				
+
 				model.texto = undefined;
 				expect(_akmm.respostaValida(model)).toBe(false);
 			})
-			
-			
+
+
 			it('deve deve retornar false - resposta.texto.length == undefined || < 1', function(){
 				var _akmm = _AltKooponMensagemModel;
 				var model = new _AltKooponMensagemModel(modeloMensagemCompleto);
-				
+
 				model.texto = "";
 				expect(_akmm.respostaValida(model)).toBe(false);
 			})
-			
+
 			it('deve deve retornar true - resposta.texto.length != undefined && > 0', function(){
 				var _akmm = _AltKooponMensagemModel;
 				var model = new _AltKooponMensagemModel(modeloMensagemCompleto);
-				
+
 				model.texto = "Mensagem deve ser enviada.";
 				expect(_akmm.respostaValida(model)).toBe(true);
 			})
@@ -546,13 +546,13 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
             describe('criação', function() {
                 it('deve ter o valor correto para a a propriedade mensagem', inject(function($controller) {
                     $controller(NOME_CONTROLLER_MENSAGENS, {$scope: _scope});
-					
+
                     expect(_scope.akmCtrl.mensagem instanceof _AltKooponMensagemModel).toBe(true);
                 }))
-				
+
                 it('deve ter o valor correto para a a propriedade AltKooponMensagemModel', inject(function($controller) {
                     $controller(NOME_CONTROLLER_MENSAGENS, {$scope: _scope});
-					
+
 					expect(_scope.akmCtrl.AltKooponMensagemModel).toEqual(_AltKooponMensagemModel);
                 }))
 
@@ -1059,6 +1059,84 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
         })
     });
 
+    describe('directive - alt-koopon-enter-submit', function() {
+        var _element;
+
+        beforeEach(function() {
+          _element = undefined;
+        });
+
+        describe('criação', function() {
+            it('deve ser criado corretamente', function() {
+              var _html = '<div alt-koopon-enter-submit seletor="input" btn-submit="#x"><input type="text"/><button type="button" id="x">x</button>';
+
+              _element = angular.element(_html);
+              _compile(_element)(_scope);
+
+              _scope.$digest();
+            });
+        });
+
+        describe('onEvent', function() {
+          it('não deve acionar o evento, apenas enter pressionado', function() {
+              var _html = '<div alt-koopon-enter-submit seletor="input" btn-submit="#x"><input type="text"/><button type="button" id="x">x</button>';
+
+              spyOn($.fn, 'click').and.callFake(angular.noop);
+              spyOn($.fn, 'find').and.callThrough();
+
+              _element = angular.element(_html);
+              _compile(_element)(_scope);
+
+              _scope.$digest();
+
+              var e = $.Event('keydown', {ctrlKey: true, which: 13});
+
+              _element.trigger(e);
+
+              expect(_element.find).toHaveBeenCalledWith("input");
+          })
+
+          it('não deve acionar o evento, apenas ctrl pressionado', function() {
+              var _html = '<div alt-koopon-enter-submit seletor="input" btn-submit="#x"><input type="text"/><button type="button" id="x">x</button>';
+
+              spyOn($.fn, 'click').and.callFake(angular.noop);
+              spyOn($.fn, 'find').and.callThrough();
+
+              _element = angular.element(_html);
+              _compile(_element)(_scope);
+
+              _scope.$digest();
+
+              var e = $.Event('keydown', {ctrlKey: true, which: 13});
+
+              _element.trigger(e);
+
+              expect(_element.find).toHaveBeenCalledWith("input");
+          })
+
+          it('deve acionar o evento, ctrl e enter pressionados', function() {
+              var _html = '<div alt-koopon-enter-submit seletor="input" btn-submit="#x"><input type="text"/><button type="button" id="x">x</button>';
+
+              spyOn($.fn, 'click').and.callFake(angular.noop);
+              spyOn($.fn, 'find').and.callThrough();
+
+              _element = angular.element(_html);
+              _compile(_element)(_scope);
+
+              _scope.$digest();
+
+              var e = $.Event('keydown');
+
+              e.ctrlKey = true;
+              e.which = 13;
+
+              _element.trigger(e);
+
+              expect(_element.find).toHaveBeenCalledWith("input");
+          })
+        });
+    })
+
     describe('directive - alt-koopon-mensagens-toggle', function() {
         var _element;
 
@@ -1106,13 +1184,13 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
                 expect($('a').slideDown).toHaveBeenCalledWith('fast');
                 expect($('a').slideUp).toHaveBeenCalledWith('fast');
             })
-			
-			
+
+
 			it ('Deve chamar slideup apenas (click na mensagem aberta)', function(){
 				spyOn($.fn, 'slideDown').and.callFake(angular.noop);
                 spyOn($.fn, 'slideUp').and.callFake(angular.noop);
 				spyOn($.fn, 'is').and.returnValue(true);
-				
+
 				var _html = '<div alt-koopon-mensagem-toggle>\
                                 <h4 class="assunto-mensagem"></h4>\
                                 <div class="mensagens-container"></div>\
@@ -1122,18 +1200,18 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
                 _compile(_element)(_scope);
 
                 _scope.$digest();
-				
-				_element.find('.assunto-mensagem').click();				
-				
+
+				_element.find('.assunto-mensagem').click();
+
 				expect($('a').slideDown.calls.count()).toBe(0);
-                expect($('a').slideUp.calls.count()).toBe(1);				
+                expect($('a').slideUp.calls.count()).toBe(1);
 			})
-			
+
 			it ('Deve chamar slideup apenas (click na mensagem aberta)', function(){
 				spyOn($.fn, 'slideDown').and.callFake(angular.noop);
                 spyOn($.fn, 'slideUp').and.callFake(angular.noop);
 				spyOn($.fn, 'is').and.returnValue(false);
-				
+
 				var _html = '<div alt-koopon-mensagem-toggle>\
                                 <h4 class="assunto-mensagem"></h4>\
                                 <div class="mensagens-container"></div>\
@@ -1143,11 +1221,11 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
                 _compile(_element)(_scope);
 
                 _scope.$digest();
-				
-				_element.find('.assunto-mensagem').click();				
-				
+
+				_element.find('.assunto-mensagem').click();
+
 				expect($('a').slideDown.calls.count()).toBe(1);
-                expect($('a').slideUp.calls.count()).toBe(1);				
+                expect($('a').slideUp.calls.count()).toBe(1);
 			})
         })
     });
@@ -1177,37 +1255,37 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
             it('deve chamar o removeClass, mas nao o addClass', function() {
                 spyOn($.fn, 'removeClass').and.callFake(angular.noop);
                 spyOn($.fn, 'hasClass').and.returnValue(true);
-				
+
 				var _html = '<div alt-koopon-mensagem-active></div>';
 
                 _element = angular.element(_html);
                 _compile(_element)(_scope);
 
                 _scope.$digest();
-				
+
 				spyOn($.fn, 'addClass').and.callFake(angular.noop);
-				
+
 				_element.click();
-				
+
 				expect($('a').addClass.calls.count()).toBe(0);
                 expect($('a').removeClass.calls.count()).toBe(1);
             })
-			
+
 			it('deve chamar o tanto o addClass quanto o removeClass', function() {
                 spyOn($.fn, 'removeClass').and.callFake(angular.noop);
                 spyOn($.fn, 'hasClass').and.returnValue(false);
-				
+
 				var _html = '<div alt-koopon-mensagem-active></div>';
 
                 _element = angular.element(_html);
                 _compile(_element)(_scope);
 
                 _scope.$digest();
-				
+
 				spyOn($.fn, 'addClass').and.callFake(angular.noop);
-				
+
 				_element.click();
-				
+
 				expect($('a').addClass.calls.count()).toBe(1);
                 expect($('a').removeClass.calls.count()).toBe(1);
             })
