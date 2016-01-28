@@ -290,6 +290,7 @@
                                 if (emp.id === idEmpresa) {
                                     emp.assuntos.forEach(function(assunto) {
                                         if (assunto.idMensagem === idAssunto) {
+                                            self.mensagem = "";
                                             return assunto.mensagens.push(msgEnviada);
                                         }
                                     })

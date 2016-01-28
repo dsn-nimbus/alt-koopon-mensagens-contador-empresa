@@ -656,7 +656,7 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
                     expect(_AltKooponMensagemService.enviar).toHaveBeenCalledWith(_msg, _id);
                 }))
 
-                it('deve enviar a mensagem corretamente', inject(function($controller) {
+                it('deve enviar a mensagem corretamente, limpando o campo de mensagem', inject(function($controller) {
                     var _id = 1;
                     var _msg = {a: true, mensagens: []};
                     var _msgEnviada = {a: true, criadaEm: 'x', idMensagem: 1};
@@ -672,6 +672,7 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
                     _rootScope.$digest();
 
                     expect(_AltKooponMensagemService.enviar).toHaveBeenCalledWith(_msg, _id);
+                    expect(_scope.akmCtrl.mensagem).toBe("");
                 }))
 
                 it('deve enviar a mensagem corretamente', inject(function($controller) {
@@ -1041,6 +1042,7 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
 
                   _rootScope.$digest();
 
+                  expect(_scope.empMCtrl.mensagem).toBe("");
                   expect(_scope.empMCtrl.empresas.length).toBe(3);
                   expect(_scope.empMCtrl.empresas[0].assuntos.length).toBe(1);
                   expect(_scope.empMCtrl.empresas[0].assuntos[0].mensagens.length).toBe(0);
