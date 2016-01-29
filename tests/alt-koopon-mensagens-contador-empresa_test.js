@@ -479,6 +479,28 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
                  expect(_scope.nmCtrl.clientes).toEqual(_infoStorage.assinantesEmpresa);
                }))
            })
+		   
+           describe('zeraInformacoes', function() {
+               it('deve ter mensagem como uma nova instância', inject(function($controller) {
+                   $controller(NOME_CONTROLLER_NOVA_MENSAGEM, {$scope: _scope});
+
+					_scope.nmCtrl.mensagem.assunto = 'ABCDEFG HIJ';
+					_scope.nmCtrl.mensagem.texto = 'KLM NOP Q';
+					_scope.nmCtrl.mensagem.nomeUsuarioPassaporte = 'Meu nome nao importa';
+					_scope.nmCtrl.mensagem.data = '10/10/2010';
+					_scope.nmCtrl.mensagem.anexo = 'texto anexado';
+				   
+				   _scope.nmCtrl.zeraInformacoes();
+				   
+                   expect(_scope.nmCtrl.mensagem instanceof _AltKooponMensagemModel).toBe(true);
+                   
+				   expect(_scope.nmCtrl.mensagem.assunto).toBeUndefined();
+				   expect(_scope.nmCtrl.mensagem.texto).toBeUndefined();
+				   expect(_scope.nmCtrl.mensagem.nomeUsuarioPassaporte).toBeUndefined();
+				   expect(_scope.nmCtrl.mensagem.data).toBeUndefined();
+				   expect(_scope.nmCtrl.mensagem.anexo).toBeUndefined();
+               }))
+           })
 
             describe('enviar', function() {
                 it('deve tentar enviar a mensagem, mas service retorna erro', inject(function($controller) {

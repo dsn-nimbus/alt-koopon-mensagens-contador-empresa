@@ -336,6 +336,10 @@
 
                 self.mensagem = new AltKooponMensagemModel();
                 self.clientes = AltPassaporteUsuarioLogadoManager.retorna().assinantesEmpresa;
+				
+				self.zeraInformacoes = function(){
+                    self.mensagem = new AltKooponMensagemModel();
+                };
 
                 self.enviar = function(msg, idEmpresa) {
                     AltKooponMensagemService
