@@ -218,14 +218,21 @@
                         });
                 };
 
-                self.listarMensagens = function(idAssunto) {
-                    AltKooponMensagemService
+                self.listarMensagens = function(idAssunto, assunto) {
+					if (!assunto.aberto) {
+                        assunto.aberto = true;
+                    }
+                    else {
+                        return assunto.aberto = false;
+                    }
+					
+					AltKooponMensagemService
                         .listarMensagens(idAssunto)
                         .then(function(msgs) {
                             self.assuntos
-                                .forEach(function(assunto) {
-                                    if (assunto.idMensagem === idAssunto) {
-                                        return assunto.mensagens = msgs;
+                                .forEach(function(ass) {
+                                    if (ass.idMensagem === idAssunto) {
+										return ass.mensagens = msgs;
                                     }
                                 })
 
@@ -347,7 +354,7 @@
                         .then(function(msgEnviada) {
                             angular.extend(msgEnviada, msg);
 
-                            self.mensagem = new AltKooponMensagemModel();
+                            self.mensagem = new AltKooponMensagemModel();							
 
                             $scope.$emit(EVENTO_NOVO_ASSUNTO, msgEnviada);
                             AltModalService.close(ID_MODAL_MENSAGEM);
@@ -400,8 +407,10 @@
                         return;
                     }
 
-                    $('[alt-koopon-mensagem-active]').removeClass('active');
-                    element.addClass('active');
+					if (!element.is(':visible')){
+						$('[alt-koopon-mensagem-active]').removeClass('active');
+						element.addClass('active');
+					}
                 });
             };
         }]);

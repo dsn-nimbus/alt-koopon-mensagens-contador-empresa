@@ -736,9 +736,20 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
             });
 
             describe('listarMensagens', function() {
-                var _assuntos = [{idMensagem: 1, assunto: 'x'}, {idMensagem: 2, assunto: 'y'}];
+                var _assuntos = [];
 
                 beforeEach(function() {
+					_assuntos = [					
+						{
+							idMensagem: 1, 
+							assunto: 'x'
+						}, 
+						{
+							idMensagem: 2, 
+							assunto: 'y'
+						}
+					];
+					
                     spyOn(_AltKooponMensagemService, 'listarAssuntos').and.callFake(function() {
                         return _q.when(_assuntos);
                     })
@@ -754,28 +765,61 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
                     $controller(NOME_CONTROLLER_MENSAGENS, {$scope: _scope});
 
                     _rootScope.$digest();
+					
+					expect(_scope.akmCtrl.assuntos).toEqual(_assuntos); // sem mensagens
 
+					_scope.akmCtrl.listarMensagens(_id, {});
+					
+					_rootScope.$digest();
+					
                     expect(_scope.akmCtrl.assuntos).toEqual(_assuntos); // sem mensagens
-
-                    _scope.akmCtrl.listarMensagens(_id);
-
-                    _rootScope.$digest();
-
-                    expect(_scope.akmCtrl.assuntos).toEqual(_assuntos); // sem mensagens
+					
+					expect(_AltKooponMensagemService.listarMensagens).toHaveBeenCalledWith(_id);
+                    
                 }));
 
                 it('deve buscar os assuntos corretamente', inject(function($controller) {
                     var _id = 1;
 
-                    var _respostaService = [{texto: 'abc', nomeUsuarioPassaporte: 'fulano1', data: '11/12/2013'},
-                        {texto: 'abc', nomeUsuarioPassaporte: 'fulano2', data: '11/12/2013'}];
-
-                    var _resultadoFinal = [{idMensagem: 1, assunto: 'x', mensagens: [{texto: 'abc', nomeUsuarioPassaporte: 'fulano1', data: '11/12/2013'},
-                        {texto: 'abc', nomeUsuarioPassaporte: 'fulano2', data: '11/12/2013'}]},
-                        {idMensagem: 2, assunto: 'y'}];
+                    var _respostaServiceMensagens = [
+							{
+								texto: 'abc', 
+								nomeUsuarioPassaporte: 'fulano1', 
+								data: '11/12/2013'
+							},
+							{
+								texto: 'abc', 
+								nomeUsuarioPassaporte: 'fulano2', 
+								data: '11/12/2013'
+							}
+						];
+						
+						
+                    var _resultadoFinal = [
+						{
+							idMensagem: 1, 
+							assunto: 'x', 
+							mensagens: [
+								{
+									texto: 'abc', 
+									nomeUsuarioPassaporte: 'fulano1', 
+									data: '11/12/2013'
+								},
+								{	
+									texto: 'abc', 
+									nomeUsuarioPassaporte: 'fulano2', 
+									data: '11/12/2013'
+								}
+							]
+						},
+                        {
+							idMensagem: 2, 
+							assunto: 'y'
+						}
+					];
 
                     spyOn(_AltKooponMensagemService, 'listarMensagens').and.callFake(function() {
-                        return _q.when(_respostaService);
+                        return _q.when(_respostaServiceMensagens);
                     });
 
                     spyOn(_AltKooponMensagemService, 'assuntoLido').and.callFake(function() {
@@ -784,14 +828,207 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
 
                     $controller(NOME_CONTROLLER_MENSAGENS, {$scope: _scope});
 
-                    _rootScope.$digest();
+                    _rootScope.$digest();									
+					
+					
+					expect(_scope.akmCtrl.assuntos).toEqual(_assuntos);
 
-                    _scope.akmCtrl.listarMensagens(_id);
-
-                    _rootScope.$digest();
+                    _scope.akmCtrl.listarMensagens(_id, {});
+					
+					_rootScope.$digest();
 
                     expect(_scope.akmCtrl.assuntos).toEqual(_resultadoFinal);
+					
+					expect(_AltKooponMensagemService.listarMensagens).toHaveBeenCalledWith(_id);
                 }));
+				
+			    it('NÃO deve buscar os assuntos, o mesmo não está aberto', inject(function($controller) {
+                    var _id = 1;
+
+                    var _respostaServiceMensagens = [
+							{
+								texto: 'abc', 
+								nomeUsuarioPassaporte: 'fulano1', 
+								data: '11/12/2013'
+							},
+							{
+								texto: 'abc', 
+								nomeUsuarioPassaporte: 'fulano2', 
+								data: '11/12/2013'
+							}
+						];
+						
+						
+                    var _resultadoFinal = [
+						{
+							idMensagem: 1, 
+							assunto: 'x', 
+							mensagens: [
+								{
+									texto: 'abc', 
+									nomeUsuarioPassaporte: 'fulano1', 
+									data: '11/12/2013'
+								},
+								{	
+									texto: 'abc', 
+									nomeUsuarioPassaporte: 'fulano2', 
+									data: '11/12/2013'
+								}
+							]
+						},
+                        {
+							idMensagem: 2, 
+							assunto: 'y'
+						}
+					];
+
+                    spyOn(_AltKooponMensagemService, 'listarMensagens').and.callFake(function() {
+                        return _q.when(_respostaServiceMensagens);
+                    });
+
+                    spyOn(_AltKooponMensagemService, 'assuntoLido').and.callFake(function() {
+                        return _q.when({});
+                    });
+
+                    $controller(NOME_CONTROLLER_MENSAGENS, {$scope: _scope});
+
+                    _rootScope.$digest();									
+					
+					
+					expect(_scope.akmCtrl.assuntos).toEqual(_assuntos);
+
+                    _scope.akmCtrl.listarMensagens(_id, {aberto: true});
+					
+					_rootScope.$digest();
+
+					expect(_scope.akmCtrl.assuntos).not.toEqual(_resultadoFinal);
+                    expect(_scope.akmCtrl.assuntos).toEqual(_assuntos);
+					
+					expect(_AltKooponMensagemService.listarMensagens).not.toHaveBeenCalled();
+                }));
+				
+			    it('Deve abrir o assunto, buscando as informacoes', inject(function($controller) {
+                    var _id = 1;
+
+                    var _respostaServiceMensagens = [
+							{
+								texto: 'abc', 
+								nomeUsuarioPassaporte: 'fulano1', 
+								data: '11/12/2013'
+							},
+							{
+								texto: 'abc', 
+								nomeUsuarioPassaporte: 'fulano2', 
+								data: '11/12/2013'
+							}
+						];
+						
+						
+                    var _resultadoFinal = [
+						{
+							idMensagem: 1, 
+							assunto: 'x', 
+							aberto: true,
+							mensagens: [
+								{
+									texto: 'abc', 
+									nomeUsuarioPassaporte: 'fulano1', 
+									data: '11/12/2013'
+								},
+								{	
+									texto: 'abc', 
+									nomeUsuarioPassaporte: 'fulano2', 
+									data: '11/12/2013'
+								}
+							]
+						},
+                        {
+							idMensagem: 2, 
+							assunto: 'y'
+						}
+					];
+
+                    spyOn(_AltKooponMensagemService, 'listarMensagens').and.callFake(function() {
+                        return _q.when(_respostaServiceMensagens);
+                    });
+
+                    spyOn(_AltKooponMensagemService, 'assuntoLido').and.callFake(function() {
+                        return _q.when({});
+                    });
+
+                    $controller(NOME_CONTROLLER_MENSAGENS, {$scope: _scope});
+
+                    _rootScope.$digest();									
+					
+					
+					expect(_scope.akmCtrl.assuntos).toEqual(_assuntos);
+
+                    _scope.akmCtrl.listarMensagens(_id, _scope.akmCtrl.assuntos[0]);
+					
+					_rootScope.$digest();
+					
+					expect(_scope.akmCtrl.assuntos).toEqual(_resultadoFinal);
+					
+					expect(_AltKooponMensagemService.listarMensagens).toHaveBeenCalled();
+                }));
+				
+			    it('Deve fechar o assunto, sem buscar informacoes', inject(function($controller) {
+                    var _id = 1;
+
+                    var _respostaServiceMensagens = [
+							{
+								texto: 'abc', 
+								nomeUsuarioPassaporte: 'fulano1', 
+								data: '11/12/2013'
+							},
+							{
+								texto: 'abc', 
+								nomeUsuarioPassaporte: 'fulano2', 
+								data: '11/12/2013'
+							}
+						];
+						
+						
+                    var _resultadoFinal = [
+						{
+							idMensagem: 1, 
+							assunto: 'x', 
+							aberto: false,
+							
+						},
+                        {
+							idMensagem: 2, 
+							assunto: 'y'
+						}
+					];
+
+                    spyOn(_AltKooponMensagemService, 'listarMensagens').and.callFake(function() {
+                        return _q.when(_respostaServiceMensagens);
+                    });
+
+                    spyOn(_AltKooponMensagemService, 'assuntoLido').and.callFake(function() {
+                        return _q.when({});
+                    });
+
+                    $controller(NOME_CONTROLLER_MENSAGENS, {$scope: _scope});
+
+                    _rootScope.$digest();									
+					
+					expect(_scope.akmCtrl.assuntos).toEqual(_assuntos);
+					
+					_scope.akmCtrl.assuntos[0].aberto = true;
+
+                    _scope.akmCtrl.listarMensagens(_id, _scope.akmCtrl.assuntos[0]);
+					
+					_rootScope.$digest();
+					
+					expect(_scope.akmCtrl.assuntos).toEqual(_resultadoFinal);
+					
+					expect(_AltKooponMensagemService.listarMensagens).not.toHaveBeenCalled();
+                }));
+				
+				
+				
             });
 
             describe('AltKooponEmpresasComMensagensController', function() {
