@@ -344,17 +344,19 @@
                 self.mensagem = new AltKooponMensagemModel();
                 self.clientes = AltPassaporteUsuarioLogadoManager.retorna().assinantesEmpresa;
 				
-				self.zeraInformacoes = function(){
+				self.zeraInformacoes = function(msgForm){
                     self.mensagem = new AltKooponMensagemModel();
+					msgForm.$setPristine();
                 };
 
-                self.enviar = function(msg, idEmpresa) {
+                self.enviar = function(msg, msgForm, idEmpresa) {
                     AltKooponMensagemService
                         .enviar(msg, undefined, idEmpresa)
                         .then(function(msgEnviada) {
                             angular.extend(msgEnviada, msg);
 
-                            self.mensagem = new AltKooponMensagemModel();							
+                             self.mensagem = new AltKooponMensagemModel();
+                             msgForm.$setPristine();
 
                             $scope.$emit(EVENTO_NOVO_ASSUNTO, msgEnviada);
                             AltModalService.close(ID_MODAL_MENSAGEM);

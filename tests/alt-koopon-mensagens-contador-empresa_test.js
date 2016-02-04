@@ -484,13 +484,17 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
                it('deve ter mensagem como uma nova instância', inject(function($controller) {
                    $controller(NOME_CONTROLLER_NOVA_MENSAGEM, {$scope: _scope});
 
+				   var _fakeForm = {
+					   $setPristine: jasmine.createSpy()
+				   }
+				   
 					_scope.nmCtrl.mensagem.assunto = 'ABCDEFG HIJ';
 					_scope.nmCtrl.mensagem.texto = 'KLM NOP Q';
 					_scope.nmCtrl.mensagem.nomeUsuarioPassaporte = 'Meu nome nao importa';
 					_scope.nmCtrl.mensagem.data = '10/10/2010';
 					_scope.nmCtrl.mensagem.anexo = 'texto anexado';
 				   
-				   _scope.nmCtrl.zeraInformacoes();
+				   _scope.nmCtrl.zeraInformacoes(_fakeForm);
 				   
                    expect(_scope.nmCtrl.mensagem instanceof _AltKooponMensagemModel).toBe(true);
                    
@@ -499,12 +503,17 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
 				   expect(_scope.nmCtrl.mensagem.nomeUsuarioPassaporte).toBeUndefined();
 				   expect(_scope.nmCtrl.mensagem.data).toBeUndefined();
 				   expect(_scope.nmCtrl.mensagem.anexo).toBeUndefined();
+				   
+				   expect(_fakeForm.$setPristine).toHaveBeenCalled();
                }))
            })
 
             describe('enviar', function() {
                 it('deve tentar enviar a mensagem, mas service retorna erro', inject(function($controller) {
                     var _msg = {a: true};
+					var _fakeForm = {
+					   $setPristine: jasmine.createSpy()
+					}
 
                     spyOn(_AltKooponMensagemService, 'enviar').and.callFake(function() {
                         return _q.reject({erro: 1});
@@ -518,10 +527,14 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
 
                     expect(_AltKooponMensagemService.enviar).toHaveBeenCalledWith(_msg, undefined, undefined);
                     expect(_AltModalService.close).not.toHaveBeenCalled();
+					expect(_fakeForm.$setPristine).not.toHaveBeenCalled();
                 }))
 
                 it('deve enviar a mensagem corretamente', inject(function($controller) {
                     spyOn(_rootScope, '$emit').and.callThrough();
+					var _fakeForm = {
+					   $setPristine: jasmine.createSpy()
+					}
                     var _msg = {a: true};
                     var _msgEnviada = {a: true, criadaEm: 'x'};
 
@@ -531,17 +544,21 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
 
                     $controller(NOME_CONTROLLER_NOVA_MENSAGEM, {$scope: _scope});
 
-                    _scope.nmCtrl.enviar(_msg);
+                    _scope.nmCtrl.enviar(_msg, _fakeForm);
 
                     _rootScope.$digest();
 
                     expect(_AltKooponMensagemService.enviar).toHaveBeenCalledWith(_msg, undefined, undefined);
                     expect(_AltModalService.close).toHaveBeenCalledWith('#modal-nova-mensagem');
                     expect(_rootScope.$emit).toHaveBeenCalledWith('mensagem:novo-assunto', _msgEnviada);
+					expect(_fakeForm.$setPristine).toHaveBeenCalled();
                 }));
 
                 it('deve enviar a mensagem corretamente - com idEmpresa', inject(function($controller) {
                     spyOn(_rootScope, '$emit').and.callThrough();
+					var _fakeForm = {
+					   $setPristine: jasmine.createSpy()
+					}
 
                     var _msg = {a: true};
                     var _idEmpresa = 1;
@@ -553,13 +570,14 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
 
                     $controller(NOME_CONTROLLER_NOVA_MENSAGEM, {$scope: _scope});
 
-                    _scope.nmCtrl.enviar(_msg, _idEmpresa);
+                    _scope.nmCtrl.enviar(_msg, _fakeForm, _idEmpresa);
 
                     _rootScope.$digest();
 
                     expect(_AltKooponMensagemService.enviar).toHaveBeenCalledWith(_msg, undefined, _idEmpresa);
                     expect(_AltModalService.close).toHaveBeenCalledWith('#modal-nova-mensagem');
                     expect(_rootScope.$emit).toHaveBeenCalledWith('mensagem:novo-assunto', _msgEnviada);
+					expect(_fakeForm.$setPristine).toHaveBeenCalled();
                 }));
             });
         });
