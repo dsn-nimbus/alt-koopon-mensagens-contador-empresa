@@ -409,7 +409,7 @@
                         return;
                     }
 
-					if (!element.is(':visible')){
+					if (!element.find('.mensagens-container').eq(0).is(':visible')){
 						$('[alt-koopon-mensagem-active]').removeClass('active');
 						element.addClass('active');
 					}

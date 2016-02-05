@@ -1562,6 +1562,7 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
                 _scope.$digest();
 
 				spyOn($.fn, 'addClass').and.callFake(angular.noop);
+				spyOn($.fn, 'is').and.returnValue(false);
 
 				_element.click();
 
