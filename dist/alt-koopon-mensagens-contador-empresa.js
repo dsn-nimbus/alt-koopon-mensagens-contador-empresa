@@ -225,7 +225,7 @@
                     else {
                         return assunto.aberto = false;
                     }
-					
+
 					AltKooponMensagemService
                         .listarMensagens(idAssunto)
                         .then(function(msgs) {
@@ -343,7 +343,7 @@
 
                 self.mensagem = new AltKooponMensagemModel();
                 self.clientes = AltPassaporteUsuarioLogadoManager.retorna().assinantesEmpresa;
-				
+
 				self.zeraInformacoes = function(msgForm){
                     self.mensagem = new AltKooponMensagemModel();
 					msgForm.$setPristine();
@@ -402,17 +402,17 @@
         }])
         .directive('altKooponMensagemActive', [function() {
             return function(scope, element, attrs) {
+
                 element.on('click', function() {
 
                     if (element.hasClass('active')){
-                        element.removeClass('active');
-                        return;
+                      element.removeClass('active');
+                      return;
                     }
-
-					if (!element.find('.mensagens-container').eq(0).is(':visible')){
-						$('[alt-koopon-mensagem-active]').removeClass('active');
-						element.addClass('active');
-					}
+                    if (!element.next('.mensagens-container').eq(0).is(':visible')){
+                      $('[alt-koopon-mensagem-active]').removeClass('active');
+                      element.addClass('active');
+                    }
                 });
             };
         }]);

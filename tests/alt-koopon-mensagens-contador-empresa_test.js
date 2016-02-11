@@ -479,7 +479,7 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
                  expect(_scope.nmCtrl.clientes).toEqual(_infoStorage.assinantesEmpresa);
                }))
            })
-		   
+
            describe('zeraInformacoes', function() {
                it('deve ter mensagem como uma nova instância', inject(function($controller) {
                    $controller(NOME_CONTROLLER_NOVA_MENSAGEM, {$scope: _scope});
@@ -487,23 +487,23 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
 				   var _fakeForm = {
 					   $setPristine: jasmine.createSpy()
 				   }
-				   
+
 					_scope.nmCtrl.mensagem.assunto = 'ABCDEFG HIJ';
 					_scope.nmCtrl.mensagem.texto = 'KLM NOP Q';
 					_scope.nmCtrl.mensagem.nomeUsuarioPassaporte = 'Meu nome nao importa';
 					_scope.nmCtrl.mensagem.data = '10/10/2010';
 					_scope.nmCtrl.mensagem.anexo = 'texto anexado';
-				   
+
 				   _scope.nmCtrl.zeraInformacoes(_fakeForm);
-				   
+
                    expect(_scope.nmCtrl.mensagem instanceof _AltKooponMensagemModel).toBe(true);
-                   
+
 				   expect(_scope.nmCtrl.mensagem.assunto).toBeUndefined();
 				   expect(_scope.nmCtrl.mensagem.texto).toBeUndefined();
 				   expect(_scope.nmCtrl.mensagem.nomeUsuarioPassaporte).toBeUndefined();
 				   expect(_scope.nmCtrl.mensagem.data).toBeUndefined();
 				   expect(_scope.nmCtrl.mensagem.anexo).toBeUndefined();
-				   
+
 				   expect(_fakeForm.$setPristine).toHaveBeenCalled();
                }))
            })
@@ -757,17 +757,17 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
                 var _assuntos = [];
 
                 beforeEach(function() {
-					_assuntos = [					
+					_assuntos = [
 						{
-							idMensagem: 1, 
+							idMensagem: 1,
 							assunto: 'x'
-						}, 
+						},
 						{
-							idMensagem: 2, 
+							idMensagem: 2,
 							assunto: 'y'
 						}
 					];
-					
+
                     spyOn(_AltKooponMensagemService, 'listarAssuntos').and.callFake(function() {
                         return _q.when(_assuntos);
                     })
@@ -783,17 +783,17 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
                     $controller(NOME_CONTROLLER_MENSAGENS, {$scope: _scope});
 
                     _rootScope.$digest();
-					
+
 					expect(_scope.akmCtrl.assuntos).toEqual(_assuntos); // sem mensagens
 
 					_scope.akmCtrl.listarMensagens(_id, {});
-					
+
 					_rootScope.$digest();
-					
+
                     expect(_scope.akmCtrl.assuntos).toEqual(_assuntos); // sem mensagens
-					
+
 					expect(_AltKooponMensagemService.listarMensagens).toHaveBeenCalledWith(_id);
-                    
+
                 }));
 
                 it('deve buscar os assuntos corretamente', inject(function($controller) {
@@ -801,37 +801,37 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
 
                     var _respostaServiceMensagens = [
 							{
-								texto: 'abc', 
-								nomeUsuarioPassaporte: 'fulano1', 
+								texto: 'abc',
+								nomeUsuarioPassaporte: 'fulano1',
 								data: '11/12/2013'
 							},
 							{
-								texto: 'abc', 
-								nomeUsuarioPassaporte: 'fulano2', 
+								texto: 'abc',
+								nomeUsuarioPassaporte: 'fulano2',
 								data: '11/12/2013'
 							}
 						];
-						
-						
+
+
                     var _resultadoFinal = [
 						{
-							idMensagem: 1, 
-							assunto: 'x', 
+							idMensagem: 1,
+							assunto: 'x',
 							mensagens: [
 								{
-									texto: 'abc', 
-									nomeUsuarioPassaporte: 'fulano1', 
+									texto: 'abc',
+									nomeUsuarioPassaporte: 'fulano1',
 									data: '11/12/2013'
 								},
-								{	
-									texto: 'abc', 
-									nomeUsuarioPassaporte: 'fulano2', 
+								{
+									texto: 'abc',
+									nomeUsuarioPassaporte: 'fulano2',
 									data: '11/12/2013'
 								}
 							]
 						},
                         {
-							idMensagem: 2, 
+							idMensagem: 2,
 							assunto: 'y'
 						}
 					];
@@ -846,56 +846,56 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
 
                     $controller(NOME_CONTROLLER_MENSAGENS, {$scope: _scope});
 
-                    _rootScope.$digest();									
-					
-					
+                    _rootScope.$digest();
+
+
 					expect(_scope.akmCtrl.assuntos).toEqual(_assuntos);
 
                     _scope.akmCtrl.listarMensagens(_id, {});
-					
+
 					_rootScope.$digest();
 
                     expect(_scope.akmCtrl.assuntos).toEqual(_resultadoFinal);
-					
+
 					expect(_AltKooponMensagemService.listarMensagens).toHaveBeenCalledWith(_id);
                 }));
-				
+
 			    it('NÃO deve buscar os assuntos, o mesmo não está aberto', inject(function($controller) {
                     var _id = 1;
 
                     var _respostaServiceMensagens = [
 							{
-								texto: 'abc', 
-								nomeUsuarioPassaporte: 'fulano1', 
+								texto: 'abc',
+								nomeUsuarioPassaporte: 'fulano1',
 								data: '11/12/2013'
 							},
 							{
-								texto: 'abc', 
-								nomeUsuarioPassaporte: 'fulano2', 
+								texto: 'abc',
+								nomeUsuarioPassaporte: 'fulano2',
 								data: '11/12/2013'
 							}
 						];
-						
-						
+
+
                     var _resultadoFinal = [
 						{
-							idMensagem: 1, 
-							assunto: 'x', 
+							idMensagem: 1,
+							assunto: 'x',
 							mensagens: [
 								{
-									texto: 'abc', 
-									nomeUsuarioPassaporte: 'fulano1', 
+									texto: 'abc',
+									nomeUsuarioPassaporte: 'fulano1',
 									data: '11/12/2013'
 								},
-								{	
-									texto: 'abc', 
-									nomeUsuarioPassaporte: 'fulano2', 
+								{
+									texto: 'abc',
+									nomeUsuarioPassaporte: 'fulano2',
 									data: '11/12/2013'
 								}
 							]
 						},
                         {
-							idMensagem: 2, 
+							idMensagem: 2,
 							assunto: 'y'
 						}
 					];
@@ -910,58 +910,58 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
 
                     $controller(NOME_CONTROLLER_MENSAGENS, {$scope: _scope});
 
-                    _rootScope.$digest();									
-					
-					
+                    _rootScope.$digest();
+
+
 					expect(_scope.akmCtrl.assuntos).toEqual(_assuntos);
 
                     _scope.akmCtrl.listarMensagens(_id, {aberto: true});
-					
+
 					_rootScope.$digest();
 
 					expect(_scope.akmCtrl.assuntos).not.toEqual(_resultadoFinal);
                     expect(_scope.akmCtrl.assuntos).toEqual(_assuntos);
-					
+
 					expect(_AltKooponMensagemService.listarMensagens).not.toHaveBeenCalled();
                 }));
-				
+
 			    it('Deve abrir o assunto, buscando as informacoes', inject(function($controller) {
                     var _id = 1;
 
                     var _respostaServiceMensagens = [
 							{
-								texto: 'abc', 
-								nomeUsuarioPassaporte: 'fulano1', 
+								texto: 'abc',
+								nomeUsuarioPassaporte: 'fulano1',
 								data: '11/12/2013'
 							},
 							{
-								texto: 'abc', 
-								nomeUsuarioPassaporte: 'fulano2', 
+								texto: 'abc',
+								nomeUsuarioPassaporte: 'fulano2',
 								data: '11/12/2013'
 							}
 						];
-						
-						
+
+
                     var _resultadoFinal = [
 						{
-							idMensagem: 1, 
-							assunto: 'x', 
+							idMensagem: 1,
+							assunto: 'x',
 							aberto: true,
 							mensagens: [
 								{
-									texto: 'abc', 
-									nomeUsuarioPassaporte: 'fulano1', 
+									texto: 'abc',
+									nomeUsuarioPassaporte: 'fulano1',
 									data: '11/12/2013'
 								},
-								{	
-									texto: 'abc', 
-									nomeUsuarioPassaporte: 'fulano2', 
+								{
+									texto: 'abc',
+									nomeUsuarioPassaporte: 'fulano2',
 									data: '11/12/2013'
 								}
 							]
 						},
                         {
-							idMensagem: 2, 
+							idMensagem: 2,
 							assunto: 'y'
 						}
 					];
@@ -976,46 +976,46 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
 
                     $controller(NOME_CONTROLLER_MENSAGENS, {$scope: _scope});
 
-                    _rootScope.$digest();									
-					
-					
+                    _rootScope.$digest();
+
+
 					expect(_scope.akmCtrl.assuntos).toEqual(_assuntos);
 
                     _scope.akmCtrl.listarMensagens(_id, _scope.akmCtrl.assuntos[0]);
-					
+
 					_rootScope.$digest();
-					
+
 					expect(_scope.akmCtrl.assuntos).toEqual(_resultadoFinal);
-					
+
 					expect(_AltKooponMensagemService.listarMensagens).toHaveBeenCalled();
                 }));
-				
+
 			    it('Deve fechar o assunto, sem buscar informacoes', inject(function($controller) {
                     var _id = 1;
 
                     var _respostaServiceMensagens = [
 							{
-								texto: 'abc', 
-								nomeUsuarioPassaporte: 'fulano1', 
+								texto: 'abc',
+								nomeUsuarioPassaporte: 'fulano1',
 								data: '11/12/2013'
 							},
 							{
-								texto: 'abc', 
-								nomeUsuarioPassaporte: 'fulano2', 
+								texto: 'abc',
+								nomeUsuarioPassaporte: 'fulano2',
 								data: '11/12/2013'
 							}
 						];
-						
-						
+
+
                     var _resultadoFinal = [
 						{
-							idMensagem: 1, 
-							assunto: 'x', 
+							idMensagem: 1,
+							assunto: 'x',
 							aberto: false,
-							
+
 						},
                         {
-							idMensagem: 2, 
+							idMensagem: 2,
 							assunto: 'y'
 						}
 					];
@@ -1030,23 +1030,23 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
 
                     $controller(NOME_CONTROLLER_MENSAGENS, {$scope: _scope});
 
-                    _rootScope.$digest();									
-					
+                    _rootScope.$digest();
+
 					expect(_scope.akmCtrl.assuntos).toEqual(_assuntos);
-					
+
 					_scope.akmCtrl.assuntos[0].aberto = true;
 
                     _scope.akmCtrl.listarMensagens(_id, _scope.akmCtrl.assuntos[0]);
-					
+
 					_rootScope.$digest();
-					
+
 					expect(_scope.akmCtrl.assuntos).toEqual(_resultadoFinal);
-					
+
 					expect(_AltKooponMensagemService.listarMensagens).not.toHaveBeenCalled();
                 }));
-				
-				
-				
+
+
+
             });
 
             describe('AltKooponEmpresasComMensagensController', function() {
@@ -1535,39 +1535,41 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
                 spyOn($.fn, 'removeClass').and.callFake(angular.noop);
                 spyOn($.fn, 'hasClass').and.returnValue(true);
 
-				var _html = '<div alt-koopon-mensagem-active></div>';
+                var _html = '<div alt-koopon-mensagem-active></div>';
 
                 _element = angular.element(_html);
                 _compile(_element)(_scope);
 
                 _scope.$digest();
 
-				spyOn($.fn, 'addClass').and.callFake(angular.noop);
+                spyOn($.fn, 'addClass').and.callFake(angular.noop);
 
-				_element.click();
+                _element.click();
 
-				expect($('a').addClass.calls.count()).toBe(0);
+                expect($('a').addClass.calls.count()).toBe(0);
                 expect($('a').removeClass.calls.count()).toBe(1);
             })
 
-			it('deve chamar o tanto o addClass quanto o removeClass', function() {
+            it('deve chamar o tanto o addClass quanto o removeClass', function() {
                 spyOn($.fn, 'removeClass').and.callFake(angular.noop);
                 spyOn($.fn, 'hasClass').and.returnValue(false);
 
-				var _html = '<div alt-koopon-mensagem-active></div>';
+                var _html = '<div alt-koopon-mensagem-active></div>';
 
                 _element = angular.element(_html);
                 _compile(_element)(_scope);
 
                 _scope.$digest();
 
-				spyOn($.fn, 'addClass').and.callFake(angular.noop);
-				spyOn($.fn, 'is').and.returnValue(false);
+                spyOn($.fn, 'addClass').and.callFake(angular.noop);
+                spyOn($.fn, 'is').and.returnValue(false);
+                spyOn($.fn, 'next').and.callThrough();
 
-				_element.click();
+                _element.click();
 
-				expect($('a').addClass.calls.count()).toBe(1);
+                expect($('a').addClass.calls.count()).toBe(1);
                 expect($('a').removeClass.calls.count()).toBe(1);
+                expect($('a').next.calls.count()).toBe(1);
             })
         })
     });
