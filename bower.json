@@ -1,7 +1,7 @@
 {
   "name": "alt-koopon-mensagens-contador-empresa",
   "main": "dist/alt-koopon-mensagens-contador-empresa.min.js",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "homepage": "https://github.com/dsn-nimbus/alt-koopon-mensagens-contador-empresa.git",
   "authors": [
     "dsn-nimbus <ericdantas0@gmail.com>"
@@ -29,7 +29,8 @@
     "alt-passaporte-usuario-logado": "~0.0.1",
     "alt-modal-service": "~0.0.1",
     "jquery": "~2.1.4",
-    "alt-carregando-info": "~0.0.1"
+    "alt-carregando-info": "~0.0.1",
+    "alt-koopon-notificacoes": "^0.0.5"
   },
   "devDependencies": {
     "angular-mocks": ">=1.0.8"

@@ -2,7 +2,8 @@
 
 describe('Service: AltKooponMensagemContadorEmpresa', function () {
     var _rootScope, _scope, _q, _compile, _httpBackend, _AltKooponMensagemService, _AltKooponMensagemModel,
-        _AltPassaporteUsuarioLogadoManager, _AltModalService, _ALT_KOOPON_URL_BASE_API_MENSAGEM;
+        _AltPassaporteUsuarioLogadoManager, _AltModalService, _AltKooponNotificacoesManager, _ALT_KOOPON_URL_BASE_API_MENSAGEM;
+
     var modeloMensagemCompleto;
     var ID_MODAL_MENSAGEM;
     var EVENTO_NOVO_ASSUNTO;
@@ -23,6 +24,7 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
         _AltKooponMensagemModel = $injector.get('AltKooponMensagemModel');
         _AltModalService = $injector.get('AltModalService');
         _AltPassaporteUsuarioLogadoManager = $injector.get('AltPassaporteUsuarioLogadoManager');
+        _AltKooponNotificacoesManager = $injector.get('AltKooponNotificacoesManager');
         _ALT_KOOPON_URL_BASE_API_MENSAGEM = $injector.get('ALT_KOOPON_URL_BASE_API_MENSAGEM');
 
         modeloMensagemCompleto = {
@@ -35,6 +37,8 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
 
         spyOn(_AltModalService, 'open').and.callFake(angular.noop);
         spyOn(_AltModalService, 'close').and.callFake(angular.noop);
+
+        spyOn(_AltKooponNotificacoesManager, 'atualiza').and.callFake(angular.noop);
     }));
 
     describe('constantes', function() {
@@ -412,6 +416,56 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
                 _AltKooponMensagemService.enviar(_msg, _id, _idEmpresa)
                     .then(function(msg) {
                         expect(msg instanceof _AltKooponMensagemModel).toBe(true);
+                    })
+                    .catch(function(){expect(true).toBe(false)});
+
+                _httpBackend.flush();
+            })
+
+            it('deve enviar mensagem corretamente - deve chamar o módulo de notificação com os parâmetros corretos - storage vazia', function() {
+                var _id = 1;
+                var _idEmpresa = 2;
+                var _msg = new _AltKooponMensagemModel('a', 'b');
+                var _resposta = {assunto: 'a', texto: 'b'};
+
+                spyOn(_AltKooponNotificacoesManager, 'retorna').and.returnValue({});
+
+                _httpBackend.expectPOST(URL_BASE + '/' + _id + '/clientes/' + _idEmpresa, _msg).respond(200, _resposta);
+
+                _AltKooponMensagemService.enviar(_msg, _id, _idEmpresa)
+                    .then(function(msg) {
+                      expect(_AltKooponNotificacoesManager.atualiza).toHaveBeenCalledWith('limpa', true);
+                      expect(_AltKooponNotificacoesManager.atualiza).toHaveBeenCalledWith('qtd', 1);
+                      expect(_AltKooponNotificacoesManager.atualiza).toHaveBeenCalledWith('qtdUltimaReq', 1);
+
+                      expect(msg instanceof _AltKooponMensagemModel).toBe(true);
+                    })
+                    .catch(function(){expect(true).toBe(false)});
+
+                _httpBackend.flush();
+            })
+
+            it('deve enviar mensagem corretamente - deve chamar o módulo de notificação com os parâmetros corretos - storage cheia', function() {
+                var _id = 1;
+                var _idEmpresa = 2;
+                var _msg = new _AltKooponMensagemModel('a', 'b');
+                var _resposta = {assunto: 'a', texto: 'b'};
+
+                spyOn(_AltKooponNotificacoesManager, 'retorna').and.returnValue({
+                  qtd: 999,
+                  qtdUltimaReq: 1001,
+                  limpa: false
+                });
+
+                _httpBackend.expectPOST(URL_BASE + '/' + _id + '/clientes/' + _idEmpresa, _msg).respond(200, _resposta);
+
+                _AltKooponMensagemService.enviar(_msg, _id, _idEmpresa)
+                    .then(function(msg) {
+                      expect(_AltKooponNotificacoesManager.atualiza).toHaveBeenCalledWith('limpa', true);
+                      expect(_AltKooponNotificacoesManager.atualiza).toHaveBeenCalledWith('qtd', 1000);
+                      expect(_AltKooponNotificacoesManager.atualiza).toHaveBeenCalledWith('qtdUltimaReq', 1002);
+
+                      expect(msg instanceof _AltKooponMensagemModel).toBe(true);
                     })
                     .catch(function(){expect(true).toBe(false)});
 
