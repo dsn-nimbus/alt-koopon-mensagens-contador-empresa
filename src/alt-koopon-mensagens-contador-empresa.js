@@ -330,7 +330,7 @@
             .listarEmpresasAssuntos()
             .then(function(empresasComAssuntos) {
               empresasComAssuntos.forEach(function(emp){
-                if (emp.id === empresa.id){
+                if (emp.id == empresa.id){
                   self.empresas = [emp];
                 }
               })
