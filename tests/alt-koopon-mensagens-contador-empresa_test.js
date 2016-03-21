@@ -2,11 +2,14 @@
 
 describe('Service: AltKooponMensagemContadorEmpresa', function () {
     var _rootScope, _scope, _q, _compile, _httpBackend, _AltKooponMensagemService, _AltKooponMensagemModel,
-        _AltPassaporteUsuarioLogadoManager, _AltModalService, _AltKooponNotificacoesManager, _ALT_KOOPON_URL_BASE_API_MENSAGEM;
+        _AltPassaporteUsuarioLogadoManager, _AltModalService, _AltKooponNotificacoesManager,
+        _$xtorage,
+        _ALT_KOOPON_URL_BASE_API_MENSAGEM;
 
     var modeloMensagemCompleto;
     var ID_MODAL_MENSAGEM;
     var EVENTO_NOVO_ASSUNTO;
+    var CHAVE_CLIENTE_ESCOLHIDO;
     var NOME_CONTROLLER_MENSAGENS = 'AltKooponMensagensController as akmCtrl';
     var NOME_CONTROLLER_NOVA_MENSAGEM = 'AltKooponNovaMensagemController as nmCtrl';
     var NOME_CONTROLLER_EMPRESAS_MENSAGENS = 'AltKooponEmpresasComMensagensController as empMCtrl';
@@ -18,8 +21,10 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
         _scope = _rootScope.$new();_q = $injector.get('$q');
         _compile = $injector.get('$compile');
         _httpBackend = $injector.get('$httpBackend');
+        _$xtorage = $injector.get('$xtorage');
         ID_MODAL_MENSAGEM = $injector.get('ID_MODAL_MENSAGEM');
         EVENTO_NOVO_ASSUNTO = $injector.get('EVENTO_NOVO_ASSUNTO');
+        CHAVE_CLIENTE_ESCOLHIDO = $injector.get('CHAVE_CLIENTE_ESCOLHIDO');
         _AltKooponMensagemService = $injector.get('AltKooponMensagemService');
         _AltKooponMensagemModel = $injector.get('AltKooponMensagemModel');
         _AltModalService = $injector.get('AltModalService');
@@ -48,6 +53,10 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
 
         it('deve ter o valor correto para EVENTO_NOVO_ASSUNTO', function() {
             expect(EVENTO_NOVO_ASSUNTO).toEqual('mensagem:novo-assunto');
+        })
+
+        it('deve ter o valor correto para CHAVE_CLIENTE_ESCOLHIDO', function() {
+            expect(CHAVE_CLIENTE_ESCOLHIDO).toEqual('cliente_escolhido');
         })
     })
 
@@ -1152,7 +1161,29 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
                   expect(_scope.empMCtrl.empresas[1]).toBe(2);
                   expect(_scope.empMCtrl.empresas[2]).toBe(3);
                   expect(_scope.empMCtrl.empresas[3]).toBeUndefined();
-                }))
+                }));
+
+                it('deve buscar os assuntos corretamente da empresa escolhida', inject(function($controller) {
+
+                  //@todo AGUARDANDO ENDPOINT
+                  var _resposta = [{id: '1', assunto: 'x'}, {id: '2', assunto: 'y'}];
+                  var result = [{id: '1', assunto: 'x'}];
+
+
+                  spyOn(_AltKooponMensagemService, 'listarEmpresasAssuntos').and.callFake(function() {
+                    return _q.when(_resposta);
+                  });
+
+                  spyOn(_$xtorage, 'getFromLocalStorage').and.callFake(function (key){
+                    return {id: '1'};
+                  });
+
+                  $controller(NOME_CONTROLLER_EMPRESAS_MENSAGENS, {$scope: _scope});
+
+                  _rootScope.$digest();
+
+                  expect(_scope.empMCtrl.empresas).toEqual(result);
+                }));
 
                 it('deve registrar o evento de novo assunto', inject(function($controller) {
                   spyOn(_scope, '$on').and.callThrough();

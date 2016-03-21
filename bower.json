@@ -30,7 +30,8 @@
     "alt-modal-service": "~0.0.1",
     "jquery": "~2.1.4",
     "alt-carregando-info": "~0.0.1",
-    "alt-koopon-notificacoes": "^0.0.6"
+    "alt-koopon-notificacoes": "^0.0.6",
+    "ng-xtorage": "^1.2.1"
   },
   "devDependencies": {
     "angular-mocks": ">=1.0.8"
