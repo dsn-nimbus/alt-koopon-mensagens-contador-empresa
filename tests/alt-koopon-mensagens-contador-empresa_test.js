@@ -311,7 +311,57 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
 
                 _httpBackend.flush();
             })
-        })
+        });
+
+        describe('listarMensagensDaEmpresa', function(){
+            it('Deve receber as mensagens da empresa em questao corretamente', function(){
+                var _empresaId = 1;
+                var _urlAssuntos = URL_BASE + '/' + _empresaId;
+                var _resposta = {'1': [{assunto: 'a', idMensagem: 2, texto: 'aaaa'}]};
+                var _result = [{id: '1', nome: 'a', assuntos: _resposta[1]}];
+                var _infoStorage = {
+                  assinantesEmpresa: [
+                    {nome: 'a', id: 1}
+                  ]
+                };
+
+                spyOn(_AltPassaporteUsuarioLogadoManager, 'retorna').and.returnValue(_infoStorage);
+
+                _httpBackend.expectGET(_urlAssuntos).respond(200, _resposta);
+
+                _AltKooponMensagemService.listarMensagensDaEmpresa(_empresaId)
+                  .then(function(msg) {
+                      expect(msg).toEqual(_result);
+                  })
+                  .catch(function(){expect(true).toBe(false)});
+
+                _httpBackend.flush();
+            })
+
+            it('Deve tentar receber as mensagens da empresa em questao, mas recebe um erro', function(){
+                var _empresaId = 1;
+                var _urlAssuntos = URL_BASE + '/' + _empresaId;
+                var _resposta = {'1': [{assunto: 'a', idMensagem: 2, texto: 'aaaa'}]};
+                var _result = [{id: '1', nome: 'a', assuntos: _resposta[1]}];
+                var _infoStorage = {
+                  assinantesEmpresa: [
+                    {nome: 'a', id: 1}
+                  ]
+                };
+
+                spyOn(_AltPassaporteUsuarioLogadoManager, 'retorna').and.returnValue(_infoStorage);
+
+                _httpBackend.expectGET(_urlAssuntos).respond(404);
+
+                _AltKooponMensagemService.listarMensagensDaEmpresa(_empresaId)
+                  .then(function(){expect(true).toBe(false)})
+                  .catch(function(erro){
+                    expect(erro).toBeDefined();
+                  });
+
+                _httpBackend.flush();
+            })
+        });
 
         describe('listarMensagens', function() {
             it('deve tentar listar assuntos, mas servidor retorna erro', function() {
@@ -1165,12 +1215,9 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
 
                 it('deve buscar os assuntos corretamente da empresa escolhida', inject(function($controller) {
 
-                  //@todo AGUARDANDO ENDPOINT
-                  var _resposta = [{id: '1', assunto: 'x'}, {id: '2', assunto: 'y'}];
-                  var result = [{id: '1', assunto: 'x'}];
+                  var _resposta = [{id: '1', assunto: 'x'}];
 
-
-                  spyOn(_AltKooponMensagemService, 'listarEmpresasAssuntos').and.callFake(function() {
+                  spyOn(_AltKooponMensagemService, 'listarMensagensDaEmpresa').and.callFake(function() {
                     return _q.when(_resposta);
                   });
 
@@ -1182,7 +1229,8 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
 
                   _rootScope.$digest();
 
-                  expect(_scope.empMCtrl.empresas).toEqual(result);
+                  expect(_scope.empMCtrl.empresas).toEqual(_resposta);
+                  expect(_AltKooponMensagemService.listarMensagensDaEmpresa).toHaveBeenCalledWith('1');
                 }));
 
                 it('deve registrar o evento de novo assunto', inject(function($controller) {
@@ -1219,6 +1267,101 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
               })
 
               describe('listarMensagens', function() {
+                it('não deve listar mensagens, service retorna erro', inject(function($controller) {
+                  var _empresas = [
+                    {id: 1, nome: 'a', assuntos: [
+                      {idMensagem: 11, mensagens: []}
+                    ]},
+                    {id: 2, nome: 'b', assuntos: [
+                      {idMensagem: 22, mensagens: []}
+                    ]},
+                    {id: 3, nome: 'c', assuntos: [
+                      {idMensagem: 33, mensagens: []}
+                    ]}
+                  ];
+
+                  var _idEmpresa = 1;
+                  var _idAssunto = 11;
+
+                  spyOn(_AltKooponMensagemService, 'listarEmpresasAssuntos').and.callFake(function() {
+                    return _q.when(_empresas);
+                  });
+
+                  spyOn(_AltKooponMensagemService, 'listarMensagens').and.callFake(function() {
+                    return _q.reject({erro: true});
+                  });
+
+                  $controller(NOME_CONTROLLER_EMPRESAS_MENSAGENS, {$scope: _scope});
+
+                  _scope.empMCtrl.listarMensagens(_idEmpresa, _idAssunto);
+
+                  _rootScope.$digest();
+
+                  expect(_scope.empMCtrl.empresas.length).toBe(3);
+                  expect(_scope.empMCtrl.empresas[0].assuntos.length).toBe(1);
+                  expect(_scope.empMCtrl.empresas[0].assuntos[0].mensagens.length).toBe(0);
+
+                  expect(_scope.empMCtrl.empresas[1].assuntos.length).toBe(1);
+                  expect(_scope.empMCtrl.empresas[1].assuntos[0].mensagens.length).toBe(0);
+
+                  expect(_scope.empMCtrl.empresas[2].assuntos.length).toBe(1);
+                  expect(_scope.empMCtrl.empresas[2].assuntos[0].mensagens.length).toBe(0);
+                }));
+
+                it('deve listar mensagens corretamente', inject(function($controller) {
+                  var _empresas = [
+                    {id: 1, nome: 'a', assuntos: [
+                      {idMensagem: 11, mensagens: []}
+                    ]},
+                    {id: 2, nome: 'b', assuntos: [
+                      {idMensagem: 22, mensagens: []}
+                    ]},
+                    {id: 3, nome: 'c', assuntos: [
+                      {idMensagem: 33, mensagens: []}
+                    ]}
+                  ];
+
+                  var _mensagens = [
+                    {texto: '11-aa'},
+                    {texto: '11-bb'},
+                    {texto: '11-cc'},
+                    {texto: '11-dd'}
+                  ];
+
+                  var _idEmpresa = 1;
+                  var _idAssunto = 11;
+
+                  spyOn(_AltKooponMensagemService, 'listarEmpresasAssuntos').and.callFake(function() {
+                    return _q.when(_empresas);
+                  });
+
+                  spyOn(_AltKooponMensagemService, 'listarMensagens').and.callFake(function() {
+                    return _q.when(_mensagens);
+                  });
+
+                  $controller(NOME_CONTROLLER_EMPRESAS_MENSAGENS, {$scope: _scope});
+
+                  _scope.empMCtrl.listarMensagens(_idEmpresa, _idAssunto);
+
+                  _rootScope.$digest();
+
+                  expect(_scope.empMCtrl.empresas.length).toBe(3);
+                  expect(_scope.empMCtrl.empresas[0].assuntos.length).toBe(1);
+                  expect(_scope.empMCtrl.empresas[0].assuntos[0].mensagens.length).toBe(4);
+                  expect(_scope.empMCtrl.empresas[0].assuntos[0].mensagens[0].texto).toEqual('11-aa');
+                  expect(_scope.empMCtrl.empresas[0].assuntos[0].mensagens[1].texto).toEqual('11-bb');
+                  expect(_scope.empMCtrl.empresas[0].assuntos[0].mensagens[2].texto).toEqual('11-cc');
+                  expect(_scope.empMCtrl.empresas[0].assuntos[0].mensagens[3].texto).toEqual('11-dd');
+
+                  expect(_scope.empMCtrl.empresas[1].assuntos.length).toBe(1);
+                  expect(_scope.empMCtrl.empresas[1].assuntos[0].mensagens.length).toBe(0);
+
+                  expect(_scope.empMCtrl.empresas[2].assuntos.length).toBe(1);
+                  expect(_scope.empMCtrl.empresas[2].assuntos[0].mensagens.length).toBe(0);
+                }));
+              })
+
+              describe('listarMensagensDaEmpresa', function() {
                 it('não deve listar mensagens, service retorna erro', inject(function($controller) {
                   var _empresas = [
                     {id: 1, nome: 'a', assuntos: [

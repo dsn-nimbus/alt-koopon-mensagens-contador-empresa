@@ -58,6 +58,10 @@
           params: {
             clientes: 'clientes'
           }
+        },
+        listarMensagensDaEmpresa: {
+          method: 'GET',
+          isArray: false
         }
       };
 
@@ -159,6 +163,38 @@
             .catch(function(erro) {
               return $q.reject(erro);
             });
+        };
+
+        AltKooponMensagemService.prototype.listarMensagensDaEmpresa = function(idEmpresa) {
+          var _verbo = 'listarMensagensDaEmpresa';
+          var _params = {idEmpresa: idEmpresa};
+
+          return AltKooponMensagemResource
+            [_verbo](_params)
+            .$promise
+            .then(function(empresas) {
+              var _empresas = [];
+              var _assinantesStorage = AltPassaporteUsuarioLogadoManager.retorna().assinantesEmpresa;
+
+              for (var prop in empresas) {
+                _assinantesStorage.forEach(function(as) {
+                  if (as.id == prop) {
+                    _empresas.push({
+                      id: prop,
+                      nome: as.nome,
+                      assuntos: empresas[prop]
+                    });
+                  }
+                })
+              }
+
+              return _empresas;
+            })
+            .catch(function(erro) {
+              return $q.reject(erro);
+            });
+
+
         };
 
         AltKooponMensagemService.prototype.enviar = function(msg, idAssunto, idEmpresa) {
@@ -325,9 +361,8 @@
         self._listarEmpresaSelecionadaAssuntos = function(empresa){
           AltCarregandoInfoService.exibe();
 
-          //@todo Aguardar o endpoint para esta parte.
           AltKooponMensagemService
-            .listarEmpresasAssuntos()
+            .listarMensagensDaEmpresa(empresa.id)
             .then(function(empresasComAssuntos) {
               empresasComAssuntos.forEach(function(emp){
                 if (emp.id == empresa.id){
@@ -346,12 +381,18 @@
         ;(function() {
 
           var empresa = $xtorage.getFromLocalStorage(CHAVE_CLIENTE_ESCOLHIDO);
-          if (empresa === null)
+
+          if (empresa === null || empresa.messageDisplayed !== undefined) {
             self._listarEmpresasAssuntos();
+            $xtorage.removeFromLocalStorage(CHAVE_CLIENTE_ESCOLHIDO);
+          }
           else
           {
             self._listarEmpresaSelecionadaAssuntos(empresa);
-            $xtorage.removeFromLocalStorage(CHAVE_CLIENTE_ESCOLHIDO);
+            empresa.messageDisplayed = true;
+            var parse = JSON.stringify(empresa);
+            if (!angular.isUndefined(parse))
+              $xtorage.save(CHAVE_CLIENTE_ESCOLHIDO, parse);
           }
 
           $scope.$on(EVENTO_NOVO_ASSUNTO, function(ev, novoAssunto) {
@@ -363,16 +404,18 @@
           });
         }());
       }])
-    .controller('AltKooponNovaMensagemController', ['$scope', 'AltKooponMensagemModel', 'AltKooponMensagemService',
+    .controller('AltKooponNovaMensagemController', ['$scope', '$xtorage', 'AltKooponMensagemModel', 'AltKooponMensagemService',
       'AltModalService', 'AltPassaporteUsuarioLogadoManager', 'ID_MODAL_MENSAGEM',
-      'EVENTO_NOVO_ASSUNTO',
-      function($scope, AltKooponMensagemModel, AltKooponMensagemService,
+      'EVENTO_NOVO_ASSUNTO', 'CHAVE_CLIENTE_ESCOLHIDO',
+      function($scope, $xtorage, AltKooponMensagemModel, AltKooponMensagemService,
                AltModalService, AltPassaporteUsuarioLogadoManager, ID_MODAL_MENSAGEM,
-               EVENTO_NOVO_ASSUNTO) {
+               EVENTO_NOVO_ASSUNTO, CHAVE_CLIENTE_ESCOLHIDO) {
         var self = this;
 
         self.mensagem = new AltKooponMensagemModel();
+        var _emp = $xtorage.getFromLocalStorage(CHAVE_CLIENTE_ESCOLHIDO);
         self.clientes = AltPassaporteUsuarioLogadoManager.retorna().assinantesEmpresa;
+        self.mensagem.empresaEscolhida = _emp || null;
 
         self.zeraInformacoes = function(msgForm){
           self.mensagem = new AltKooponMensagemModel();
@@ -380,6 +423,7 @@
         };
 
         self.enviar = function(msg, msgForm, idEmpresa) {
+
           AltKooponMensagemService
             .enviar(msg, undefined, idEmpresa)
             .then(function(msgEnviada) {
