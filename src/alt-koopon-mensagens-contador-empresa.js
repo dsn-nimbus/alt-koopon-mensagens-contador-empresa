@@ -110,9 +110,6 @@
               return mensagens.map(function(msg) {
                 return new AltKooponMensagemModel(msg);
               });
-            })
-            .catch(function(erro) {
-              return $q.reject(erro);
             });
         };
 
@@ -137,9 +134,6 @@
               }
 
               return _empresas;
-            })
-            .catch(function(erro) {
-              return $q.reject(erro);
             });
         };
 
@@ -159,9 +153,6 @@
               return mensagens.map(function(msg) {
                 return new AltKooponMensagemModel(msg);
               });
-            })
-            .catch(function(erro) {
-              return $q.reject(erro);
             });
         };
 
@@ -189,12 +180,7 @@
               }
 
               return _empresas;
-            })
-            .catch(function(erro) {
-              return $q.reject(erro);
             });
-
-
         };
 
         AltKooponMensagemService.prototype.enviar = function(msg, idAssunto, idEmpresa) {
@@ -219,9 +205,6 @@
               AltKooponNotificacoesManager.atualiza('qtdUltimaReq', _ultimaQtdNotificacoes);
 
               return new AltKooponMensagemModel(mensagemEnviada);
-            })
-            .catch(function(erro) {
-              return $q.reject(erro);
             });
         };
 
@@ -231,9 +214,6 @@
             .$promise
             .then(function() {
               return;
-            })
-            .catch(function(erro) {
-              return $q.reject(erro);
             });
         };
 
@@ -298,112 +278,7 @@
             self.assuntos.push(novoAssunto);
           });
         }());
-      }])
-    .controller('AltKooponEmpresasComMensagensController', ['$scope', '$xtorage', 'AltKooponMensagemModel', 'AltKooponMensagemService', 'AltCarregandoInfoService', 'EVENTO_NOVO_ASSUNTO', 'CHAVE_CLIENTE_ESCOLHIDO',
-      function($scope, $xtorage, AltKooponMensagemModel, AltKooponMensagemService, AltCarregandoInfoService, EVENTO_NOVO_ASSUNTO, CHAVE_CLIENTE_ESCOLHIDO) {
-        var self = this;
-
-        self.AltKooponMensagemModel = AltKooponMensagemModel;
-        self.empresas = [];
-
-        self.listarMensagens = function(idEmpresa, idAssunto) {
-          AltKooponMensagemService
-            .listarMensagens(idAssunto, idEmpresa)
-            .then(function(msgs) {
-              self.empresas.forEach(function(emp) {
-                if (emp.id === idEmpresa) {
-                  emp.assuntos.forEach(function(assunto) {
-                    if (assunto.idMensagem === idAssunto) {
-                      return assunto.mensagens = msgs;
-                    }
-                  })
-                }
-              });
-            });
-        };
-
-        self.responder = function(msg, idEmpresa, idAssunto) {
-          AltKooponMensagemService
-            .enviar(msg, idAssunto, idEmpresa)
-            .then(function(msgEnviada) {
-              self.empresas.forEach(function(emp) {
-                if (emp.id === idEmpresa) {
-                  emp.assuntos.forEach(function(assunto) {
-                    if (assunto.idMensagem === idAssunto) {
-                      self.mensagem = "";
-                      return assunto.mensagens.push(msgEnviada);
-                    }
-                  })
-                }
-              })
-            })
-            .catch(function() {
-
-            });
-        };
-
-        self._listarEmpresasAssuntos = function(){
-          AltCarregandoInfoService.exibe();
-
-          AltKooponMensagemService
-            .listarEmpresasAssuntos()
-            .then(function(empresasComAssuntos) {
-              self.empresas = empresasComAssuntos;
-            })
-            .catch(function(erro) {
-
-            })
-            .finally(function() {
-              AltCarregandoInfoService.esconde();
-            });
-        }
-
-        self._listarEmpresaSelecionadaAssuntos = function(empresa){
-          AltCarregandoInfoService.exibe();
-
-          AltKooponMensagemService
-            .listarMensagensDaEmpresa(empresa.id)
-            .then(function(empresasComAssuntos) {
-              empresasComAssuntos.forEach(function(emp){
-                if (emp.id == empresa.id){
-                  self.empresas = [emp];
-                }
-              })
-            })
-            .catch(function(erro) {
-
-            })
-            .finally(function() {
-              AltCarregandoInfoService.esconde();
-            });
-        }
-
-        ;(function() {
-
-          var empresa = $xtorage.getFromLocalStorage(CHAVE_CLIENTE_ESCOLHIDO);
-
-          if (empresa === null || empresa.messageDisplayed !== undefined) {
-            self._listarEmpresasAssuntos();
-            $xtorage.removeFromLocalStorage(CHAVE_CLIENTE_ESCOLHIDO);
-          }
-          else
-          {
-            self._listarEmpresaSelecionadaAssuntos(empresa);
-            empresa.messageDisplayed = true;
-            var parse = JSON.stringify(empresa);
-            if (!angular.isUndefined(parse))
-              $xtorage.save(CHAVE_CLIENTE_ESCOLHIDO, parse);
-          }
-
-          $scope.$on(EVENTO_NOVO_ASSUNTO, function(ev, novoAssunto) {
-            self.empresas.forEach(function(emp) {
-              if (emp.id == novoAssunto.empresaEscolhida) {
-                return emp.assuntos.push(novoAssunto);
-              }
-            });
-          });
-        }());
-      }])
+      }])    
     .controller('AltKooponNovaMensagemController', ['$scope', '$xtorage', 'AltKooponMensagemModel', 'AltKooponMensagemService',
       'AltModalService', 'AltPassaporteUsuarioLogadoManager', 'ID_MODAL_MENSAGEM',
       'EVENTO_NOVO_ASSUNTO', 'CHAVE_CLIENTE_ESCOLHIDO',
@@ -434,9 +309,6 @@
 
               $scope.$emit(EVENTO_NOVO_ASSUNTO, msgEnviada);
               AltModalService.close(ID_MODAL_MENSAGEM);
-            })
-            .catch(function(erro) {
-
             });
         };
       }])
