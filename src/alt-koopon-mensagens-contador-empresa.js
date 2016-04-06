@@ -219,66 +219,6 @@
 
         return new AltKooponMensagemService();
       }])
-    .controller('AltKooponMensagensController', ['$scope', 'AltKooponMensagemModel', 'AltKooponMensagemService', 'AltCarregandoInfoService', 'EVENTO_NOVO_ASSUNTO',
-      function($scope, AltKooponMensagemModel, AltKooponMensagemService, AltCarregandoInfoService, EVENTO_NOVO_ASSUNTO) {
-        var self = this;
-
-        self.novaMensagem = false;
-        self.AltKooponMensagemModel = AltKooponMensagemModel;
-        self.mensagem = new AltKooponMensagemModel();
-        self.assuntos = [];
-
-        self.responder = function(msg, idAssunto) {
-          AltKooponMensagemService
-            .enviar(msg, idAssunto)
-            .then(function(msgResposta) {
-              self.assuntos.forEach(function(assunto) {
-                if (assunto.idMensagem === idAssunto) {
-                  self.mensagem = "";
-                  return assunto.mensagens.push(msgResposta);
-                }
-              });
-            });
-        };
-
-        self.listarMensagens = function(idAssunto, assunto) {
-          if (!assunto.aberto) {
-            assunto.aberto = true;
-          }
-          else {
-            return assunto.aberto = false;
-          }
-
-          AltKooponMensagemService
-            .listarMensagens(idAssunto)
-            .then(function(msgs) {
-              self.assuntos.forEach(function(ass) {
-                if (ass.idMensagem === idAssunto) {
-                  return ass.mensagens = msgs;
-                }
-              })
-
-              return AltKooponMensagemService.assuntoLido(idAssunto);
-            });
-        };
-
-        ;(function() {
-          AltCarregandoInfoService.exibe();
-
-          AltKooponMensagemService
-            .listarAssuntos()
-            .then(function(assuntos) {
-              self.assuntos = assuntos;
-            })
-            .finally(function() {
-              AltCarregandoInfoService.esconde();
-            });
-
-          $scope.$on(EVENTO_NOVO_ASSUNTO, function(ev, novoAssunto) {
-            self.assuntos.push(novoAssunto);
-          });
-        }());
-      }])    
     .controller('AltKooponNovaMensagemController', ['$scope', '$xtorage', 'AltKooponMensagemModel', 'AltKooponMensagemService',
       'AltModalService', 'AltPassaporteUsuarioLogadoManager', 'ID_MODAL_MENSAGEM',
       'EVENTO_NOVO_ASSUNTO', 'CHAVE_CLIENTE_ESCOLHIDO',
