@@ -1,8 +1,7 @@
-;(function() {
+;(function(ng) {
   "use strict";
 
-  angular
-    .module('alt.koopon.mensagens-contador-empresa', [
+  ng.module('alt.koopon.mensagens-contador-empresa', [
       'ngResource',
       'alt.passaporte-usuario-logado',
       'alt.modal-service',
@@ -76,12 +75,12 @@
         this.data = undefined;
         this.anexo = undefined;
 
-        angular.extend(this, msg);
+        ng.extend(this, msg);
       };
 
       AltKooponMensagemModel.prototype.isValid = function() {
-        var _assuntoOk = angular.isDefined(this.assunto) && !!this.assunto.length;
-        var _mensagemOk = angular.isDefined(this.texto) && !!this.texto.length;
+        var _assuntoOk = ng.isDefined(this.assunto) && !!this.assunto.length;
+        var _mensagemOk = ng.isDefined(this.texto) && !!this.texto.length;
 
         return _assuntoOk && _mensagemOk;
       };
@@ -91,7 +90,7 @@
       };
 
       AltKooponMensagemModel.respostaValida = function(resposta){
-        return (angular.isDefined(resposta) && angular.isDefined(resposta.texto) && !!resposta.texto.length);
+        return (ng.isDefined(resposta) && ng.isDefined(resposta.texto) && !!resposta.texto.length);
       };
 
       return AltKooponMensagemModel;
@@ -113,27 +112,30 @@
             });
         };
 
-        AltKooponMensagemService.prototype.listarEmpresasAssuntos = function() {
+        AltKooponMensagemService.prototype.listarEmpresasAssuntos = function(empresas) {
+          if (!ng.isArray(empresas)) {
+            return $q.reject(new TypeError('Empresas deve ser um array.'));
+          }
+
           return AltKooponMensagemResource
             .listarEmpresasAssuntos()
             .$promise
-            .then(function(empresas) {
-              var _empresas = [];
-              var _assinantesStorage = AltPassaporteUsuarioLogadoManager.retorna().assinantesEmpresa;
+            .then(function(assuntosPorEmpresa) {
+              var _empresasParsed = [];
 
-              for (var prop in empresas) {
-                _assinantesStorage.forEach(function(as) {
-                  if (as.id == prop) {
-                    _empresas.push({
+              for (var prop in assuntosPorEmpresa) {
+                empresas.forEach(function(emp) {
+                  if (emp.idAssinante == prop) {
+                    _empresasParsed.push({
                       id: prop,
-                      nome: as.nome,
-                      assuntos: empresas[prop]
+                      nome: emp.nome,
+                      assuntos: assuntosPorEmpresa[prop]
                     });
                   }
                 })
               }
 
-              return _empresas;
+              return _empresasParsed;
             });
         };
 
@@ -141,7 +143,7 @@
           var _verbo = 'listarMensagens';
           var _params = {id: idAssunto};
 
-          if (angular.isDefined(idEmpresa)) {
+          if (ng.isDefined(idEmpresa)) {
             _verbo = 'listarMensagensParaEmpresa';
             _params = {id: idAssunto, idEmpresa: idEmpresa};
           }
@@ -156,30 +158,33 @@
             });
         };
 
-        AltKooponMensagemService.prototype.listarMensagensDaEmpresa = function(idEmpresa) {
+        AltKooponMensagemService.prototype.listarMensagensDaEmpresa = function(idEmpresa, empresas) {
+          if (!ng.isArray(empresas)) {
+            return $q.reject(new TypeError('Empresas deve ser um array.'));
+          }
+
           var _verbo = 'listarMensagensDaEmpresa';
           var _params = {idEmpresa: idEmpresa};
 
           return AltKooponMensagemResource
             [_verbo](_params)
             .$promise
-            .then(function(empresas) {
-              var _empresas = [];
-              var _assinantesStorage = AltPassaporteUsuarioLogadoManager.retorna().assinantesEmpresa;
+            .then(function(assuntosPorEmpresa) {
+              var _empresasParsed = [];
 
-              for (var prop in empresas) {
-                _assinantesStorage.forEach(function(as) {
-                  if (as.id == prop) {
-                    _empresas.push({
+              for (var prop in assuntosPorEmpresa) {
+                empresas.forEach(function(emp) {
+                  if (emp.idAssinante == prop) {
+                    _empresasParsed.push({
                       id: prop,
-                      nome: as.nome,
-                      assuntos: empresas[prop]
+                      nome: emp.nome,
+                      assuntos: assuntosPorEmpresa[prop]
                     });
                   }
                 })
               }
 
-              return _empresas;
+              return _empresasParsed;
             });
         };
 
@@ -187,7 +192,7 @@
           var _verbo = 'enviar';
           var _params = {id: idAssunto};
 
-          if (angular.isDefined(idEmpresa)) {
+          if (ng.isDefined(idEmpresa)) {
             _verbo = 'enviarParaEmpresa';
             _params = {id: idAssunto, idEmpresa: idEmpresa};
           }
@@ -209,12 +214,7 @@
         };
 
         AltKooponMensagemService.prototype.assuntoLido = function(idAssunto) {
-          return AltKooponMensagemResource
-            .assuntoLido({id: idAssunto})
-            .$promise
-            .then(function() {
-              return;
-            });
+          return AltKooponMensagemResource.assuntoLido({id: idAssunto}).$promise;
         };
 
         return new AltKooponMensagemService();
@@ -242,7 +242,7 @@
           AltKooponMensagemService
             .enviar(msg, undefined, idEmpresa)
             .then(function(msgEnviada) {
-              angular.extend(msgEnviada, msg);
+              ng.extend(msgEnviada, msg);
 
               self.mensagem = new AltKooponMensagemModel();
               msgForm.$setPristine();
@@ -272,7 +272,7 @@
 
         element.find('.assunto-mensagem').on('click', function() {
 
-          mensagensContainer = angular.element('.mensagens-container');
+          mensagensContainer = ng.element('.mensagens-container');
           elementMsgContainer = element.find('.mensagens-container');
 
           if (elementMsgContainer.is(':visible')) {
@@ -302,4 +302,4 @@
         });
       };
     }]);
-}());
+}(window.angular));

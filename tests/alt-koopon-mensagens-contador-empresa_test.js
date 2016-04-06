@@ -185,13 +185,46 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
     })
 
     describe('listarEmpresasAssuntos', function() {
+      it('NÃO deve tentar listar os assuntos, array de empresas não informado', function() {
+        var _urlAssuntos = URL_BASE;
+        var _empresas = undefined;
+
+        _AltKooponMensagemService
+          .listarEmpresasAssuntos(_empresas)
+          .then(function(){expect(true).toBe(false)})
+          .catch(function(erro) {
+            expect(erro).toBeDefined();
+            expect(erro instanceof TypeError).toBeDefined();
+            expect(erro.message).toEqual('Empresas deve ser um array.');
+          });
+
+        _rootScope.$digest();
+      })
+
+      it('NÃO deve tentar listar os assuntos, array de empresas não é um array', function() {
+        var _urlAssuntos = URL_BASE;
+        var _empresas = {};
+
+        _AltKooponMensagemService
+          .listarEmpresasAssuntos(_empresas)
+          .then(function(){expect(true).toBe(false)})
+          .catch(function(erro) {
+            expect(erro).toBeDefined();
+            expect(erro instanceof TypeError).toBeDefined();
+            expect(erro.message).toEqual('Empresas deve ser um array.');
+          });
+
+        _rootScope.$digest();
+      })
+
       it('deve tentar listar as empresas com os asssuntos, mas servidor retorna erro', function() {
         var _urlAssuntos = URL_BASE;
+        var _empresas = [];
 
         _httpBackend.expectGET(_urlAssuntos).respond(400);
 
         _AltKooponMensagemService
-        .listarEmpresasAssuntos()
+        .listarEmpresasAssuntos(_empresas)
         .then(function(){expect(true).toBe(false)})
         .catch(function(erro) {
           expect(erro).toBeDefined();
@@ -247,18 +280,16 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
                 }
               ];
 
-              spyOn(_AltPassaporteUsuarioLogadoManager, 'retorna').and.returnValue({
-                assinantesEmpresa: [
-                  {id: 1, nome: '1_nome'},
-                  {id: 2, nome: '2_nome'},
-                  {id: 3, nome: '3_nome'}
-                ]
-              })
+              var _empresas = [
+                  {idAssinante: 1, nome: '1_nome'},
+                  {idAssinante: 2, nome: '2_nome'},
+                  {idAssinante: 3, nome: '3_nome'}
+              ]
 
               _httpBackend.expectGET(_urlAssuntos).respond(200, _resposta);
 
               _AltKooponMensagemService
-              .listarEmpresasAssuntos()
+              .listarEmpresasAssuntos(_empresas)
               .then(function(empresas) {
                 expect(empresas[0].id).toBe('1');
                 expect(empresas[0].nome).toBe('1_nome');
@@ -312,50 +343,63 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
           });
 
           describe('listarMensagensDaEmpresa', function(){
+            it('NÃO deve tentar receber as mensagens da empresa em questao, empresas não definido', function(){
+              var _empresaId = 1;
+              var _urlAssuntos = URL_BASE + '/' + _empresaId;
+              var _resposta = {'1': [{assunto: 'a', idMensagem: 2, texto: 'aaaa'}]};
+              var _result = [{id: '1', nome: 'a', assuntos: _resposta[1]}];
+
+              var _empresas = undefined;
+
+              _AltKooponMensagemService
+                .listarMensagensDaEmpresa(_empresaId, _empresas)
+                .then(function(){expect(true).toBe(false)})
+                .catch(function(erro){
+                  expect(erro).toBeDefined();
+                  expect(erro instanceof TypeError).toBeDefined();
+                  expect(erro.message).toEqual('Empresas deve ser um array.');
+                });
+
+              _rootScope.$digest();
+            })
+
+            it('deve tentar receber as mensagens da empresa em questao, mas recebe um erro', function(){
+              var _empresaId = 1;
+              var _urlAssuntos = URL_BASE + '/' + _empresaId;
+              var _resposta = {'1': [{assunto: 'a', idMensagem: 2, texto: 'aaaa'}]};
+              var _result = [{id: '1', nome: 'a', assuntos: _resposta[1]}];
+
+              var _empresas = [{nome: 'a', id: 1}];
+
+              _httpBackend.expectGET(_urlAssuntos).respond(404);
+
+              _AltKooponMensagemService
+                .listarMensagensDaEmpresa(_empresaId, _empresas)
+                .then(function(){expect(true).toBe(false)})
+                .catch(function(erro){
+                  expect(erro).toBeDefined();
+                });
+
+              _httpBackend.flush();
+            })
+
             it('Deve receber as mensagens da empresa em questao corretamente', function(){
               var _empresaId = 1;
               var _urlAssuntos = URL_BASE + '/' + _empresaId;
               var _resposta = {'1': [{assunto: 'a', idMensagem: 2, texto: 'aaaa'}]};
               var _result = [{id: '1', nome: 'a', assuntos: _resposta[1]}];
-              var _infoStorage = {
-                assinantesEmpresa: [
-                  {nome: 'a', id: 1}
-                ]
-              };
-
-              spyOn(_AltPassaporteUsuarioLogadoManager, 'retorna').and.returnValue(_infoStorage);
+              var _empresas = [
+                  {nome: 'a', idAssinante: 1}
+              ];
 
               _httpBackend.expectGET(_urlAssuntos).respond(200, _resposta);
 
-              _AltKooponMensagemService.listarMensagensDaEmpresa(_empresaId)
+              _AltKooponMensagemService
+              .listarMensagensDaEmpresa(_empresaId, _empresas)
               .then(function(msg) {
                 expect(msg).toEqual(_result);
               })
               .catch(function(){expect(true).toBe(false)});
-
-              _httpBackend.flush();
-            })
-
-            it('Deve tentar receber as mensagens da empresa em questao, mas recebe um erro', function(){
-              var _empresaId = 1;
-              var _urlAssuntos = URL_BASE + '/' + _empresaId;
-              var _resposta = {'1': [{assunto: 'a', idMensagem: 2, texto: 'aaaa'}]};
-              var _result = [{id: '1', nome: 'a', assuntos: _resposta[1]}];
-              var _infoStorage = {
-                assinantesEmpresa: [
-                  {nome: 'a', id: 1}
-                ]
-              };
-
-              spyOn(_AltPassaporteUsuarioLogadoManager, 'retorna').and.returnValue(_infoStorage);
-
-              _httpBackend.expectGET(_urlAssuntos).respond(404);
-
-              _AltKooponMensagemService.listarMensagensDaEmpresa(_empresaId)
-              .then(function(){expect(true).toBe(false)})
-              .catch(function(erro){
-                expect(erro).toBeDefined();
-              });
 
               _httpBackend.flush();
             })
