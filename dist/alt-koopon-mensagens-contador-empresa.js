@@ -247,7 +247,7 @@
         };
 
         self.init = function(empresas, empresaEscolhida) {
-          self.mensagem.empresas = empresas || [];
+          self.empresas = empresas || [];
           self.mensagem.empresaEscolhida = empresaEscolhida || null;
         }
       }])

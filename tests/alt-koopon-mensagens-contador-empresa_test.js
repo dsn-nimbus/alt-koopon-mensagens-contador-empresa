@@ -636,7 +636,7 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
 
               _scope.nmCtrl.init(_clientes, _clienteEscolhido);
 
-              expect(_scope.nmCtrl.mensagem.empresas).toEqual([]);
+              expect(_scope.nmCtrl.empresas).toEqual([]);
               expect(_scope.nmCtrl.mensagem.empresaEscolhida).toEqual(null);
             }));
 
@@ -648,7 +648,7 @@ describe('Service: AltKooponMensagemContadorEmpresa', function () {
 
               _scope.nmCtrl.init(_clientes, _clienteEscolhido);
 
-              expect(_scope.nmCtrl.mensagem.empresas).toEqual(_clientes);
+              expect(_scope.nmCtrl.empresas).toEqual(_clientes);
               expect(_scope.nmCtrl.mensagem.empresaEscolhida).toEqual(_clienteEscolhido);
             }));
           })
