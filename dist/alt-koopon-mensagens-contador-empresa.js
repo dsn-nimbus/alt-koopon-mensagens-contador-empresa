@@ -95,8 +95,8 @@
 
       return AltKooponMensagemModel;
     }])
-    .factory('AltKooponMensagemService', ['$q', 'AltPassaporteUsuarioLogadoManager', 'AltKooponNotificacoesManager', 'AltKooponMensagemResource', 'AltKooponMensagemModel',
-      function($q, AltPassaporteUsuarioLogadoManager, AltKooponNotificacoesManager, AltKooponMensagemResource, AltKooponMensagemModel) {
+    .factory('AltKooponMensagemService', ['$q', 'AltKooponNotificacoesManager', 'AltKooponMensagemResource', 'AltKooponMensagemModel',
+      function($q, AltKooponNotificacoesManager, AltKooponMensagemResource, AltKooponMensagemModel) {
         var AltKooponMensagemService = function() {
 
         };
@@ -219,26 +219,20 @@
 
         return new AltKooponMensagemService();
       }])
-    .controller('AltKooponNovaMensagemController', ['$scope', '$xtorage', 'AltKooponMensagemModel', 'AltKooponMensagemService',
-      'AltModalService', 'AltPassaporteUsuarioLogadoManager', 'ID_MODAL_MENSAGEM',
-      'EVENTO_NOVO_ASSUNTO', 'CHAVE_CLIENTE_ESCOLHIDO',
-      function($scope, $xtorage, AltKooponMensagemModel, AltKooponMensagemService,
-               AltModalService, AltPassaporteUsuarioLogadoManager, ID_MODAL_MENSAGEM,
-               EVENTO_NOVO_ASSUNTO, CHAVE_CLIENTE_ESCOLHIDO) {
+    .controller('AltKooponNovaMensagemController', ['$scope', '$xtorage', 'AltKooponMensagemModel', 'AltKooponMensagemService', 'AltModalService', 'ID_MODAL_MENSAGEM', 'EVENTO_NOVO_ASSUNTO', 'CHAVE_CLIENTE_ESCOLHIDO',
+      function($scope, $xtorage, AltKooponMensagemModel, AltKooponMensagemService, AltModalService, ID_MODAL_MENSAGEM, EVENTO_NOVO_ASSUNTO, CHAVE_CLIENTE_ESCOLHIDO) {
         var self = this;
-
-        self.mensagem = new AltKooponMensagemModel();
         var _emp = $xtorage.getFromLocalStorage(CHAVE_CLIENTE_ESCOLHIDO);
-        self.clientes = AltPassaporteUsuarioLogadoManager.retorna().assinantesEmpresa;
-        self.mensagem.empresaEscolhida = _emp || null;
 
-        self.zeraInformacoes = function(msgForm){
+        self.empresas = [];
+        self.mensagem = new AltKooponMensagemModel();
+
+        self.zeraInformacoes = function(msgForm) {
           self.mensagem = new AltKooponMensagemModel();
           msgForm.$setPristine();
         };
 
         self.enviar = function(msg, msgForm, idEmpresa) {
-
           AltKooponMensagemService
             .enviar(msg, undefined, idEmpresa)
             .then(function(msgEnviada) {
@@ -251,6 +245,11 @@
               AltModalService.close(ID_MODAL_MENSAGEM);
             });
         };
+
+        self.init = function(empresas, empresaEscolhida) {
+          self.mensagem.empresas = empresas || [];
+          self.mensagem.empresaEscolhida = empresaEscolhida || null;
+        }
       }])
     .directive('altKooponEnterSubmit', [function() {
       return function(scope, element, attrs) {
